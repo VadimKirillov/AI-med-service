@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COVID-19 Detector</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">COVID-19 Detector</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="custom-file mb-3">
+                <input type="file" name="file" class="custom-file-input" id="customFile">
+                <label class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Detect</button>
+        </form>
+        <div class="mt-4">
+            {% if error %}
+                <p class="text-danger">{{ error }}</p>
+            {% elif predicted_label %}
+                <h4>Result: {{ predicted_label }}</h4>
+                <img src="{{ image_path }}" class="img-fluid mt-3" alt="Uploaded Image">
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

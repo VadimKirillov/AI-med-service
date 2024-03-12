@@ -1,0 +1,13 @@
+.img-fluid {
+    width: 70%;
+    height: auto;
+}
+
+h1 {
+    font-size: 3rem;
+    text-align: center;
+}
+
+h4 {
+    font-size: 2rem;
+}
