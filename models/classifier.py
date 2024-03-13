@@ -1,6 +1,7 @@
 import torch
 from torchvision import transforms
 from PIL import Image
+import torch.nn.functional as F
 
 
 # Преобразования для нового изображения
@@ -24,8 +25,11 @@ def classify_image(image_path, model):
         output = model(image_tensor)
         _, predicted = torch.max(output.data, 1)
 
+
     # Получаем метку класса
     class_labels = ['COVID', 'Normal']
     predicted_label = class_labels[predicted.item()]
+    probabilities = F.softmax(output, dim=1)
+    first_class_probability = round(probabilities[0][0].item()*100, 3)
 
-    return predicted_label
+    return predicted_label, first_class_probability

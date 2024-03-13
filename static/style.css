@@ -11,3 +11,17 @@ h1 {
 h4 {
     font-size: 2rem;
 }
+
+
+#drop_zone {
+     border: 2px dashed #ccc;
+     padding: 20px;
+     text-align: center;
+     cursor: pointer;
+}
+
+#uploaded_image {
+   max-width: 100%;
+   max-height: 200px;
+   margin-top: 20px;
+}

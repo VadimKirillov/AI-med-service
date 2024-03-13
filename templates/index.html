@@ -4,14 +4,16 @@
     <title>COVID-19 Detector</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/png" href="static/images/logo.png">
 </head>
 <body>
     <div class="container mt-4">
         <h1 class="mb-4">COVID-19 Detector</h1>
-        <form method="POST" enctype="multipart/form-data">
-            <div class="custom-file mb-3">
-                <input type="file" name="file" class="custom-file-input" id="customFile">
-                <label class="custom-file-label" for="customFile">Choose file</label>
+        <form id="upload_form" method="POST" enctype="multipart/form-data">
+            <div id="drop_zone" class="mb-3">
+                <input type="file" name="file" id="file_input" style="display: none;">
+                <label for="file_input">Drag and drop a file here or click to choose</label>
+                <img id="uploaded_image" style="display: none;">
             </div>
             <button type="submit" class="btn btn-primary btn-lg">Detect</button>
         </form>
@@ -19,10 +21,41 @@
             {% if error %}
                 <p class="text-danger">{{ error }}</p>
             {% elif predicted_label %}
+                <p>Start time: {{ start_time }}</p>
+                <p>End time: {{ end_time }}</p>
                 <h4>Result: {{ predicted_label }}</h4>
+                <h4>Probability: {{ predicted_prob }}% </h4>
                 <img src="{{ image_path }}" class="img-fluid mt-3" alt="Uploaded Image">
             {% endif %}
         </div>
     </div>
+
+    <script>
+        const dropZone = document.getElementById('drop_zone');
+        const uploadedImage = document.getElementById('uploaded_image');
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.style.backgroundColor = '#f0f0f0';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '';
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.style.backgroundColor = '';
+            const file = event.dataTransfer.files[0];
+            document.getElementById('file_input').files = event.dataTransfer.files;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage.src = e.target.result;
+                uploadedImage.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
 </body>
 </html>
