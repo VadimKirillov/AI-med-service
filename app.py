@@ -12,20 +12,26 @@ app.config['UPLOAD_FOLDER'] = 'static/images'
 # Разрешенные типы файлов
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route("/", methods=['GET', 'POST'])
-def index():
+@app.route("/")
+def base():
+    return render_template("base.html")
+
+
+@app.route("/page1", methods=['GET', 'POST'])
+def page1():
     if request.method == 'POST':
         if 'file' not in request.files:
-            return render_template("index.html", error="No file part")
+            return render_template("page1.html", error="No file part")
 
         file = request.files['file']
 
         if file.filename == '':
-            return render_template("index.html", error="No selected file")
+            return render_template("page1.html", error="No selected file")
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -45,11 +51,21 @@ def index():
             image_path = os.path.join('static/images', image_filename)
             end_time = datetime.now().isoformat()
 
-            return render_template("index.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
+            return render_template("page1.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
                                    image_path=image_path,
                                    start_time=start_time, end_time=end_time)
 
-    return render_template("index.html")
+    return render_template("page1.html")
+
+
+@app.route("/page2")
+def page2():
+    return render_template("page2.html")
+
+
+@app.route("/page3")
+def page3():
+    return render_template("page3.html")
 
 
 if __name__ == "__main__":

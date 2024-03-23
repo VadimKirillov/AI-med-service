@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}My Website{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+</head>
+<body>
+
+    <div class="top-menu">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="/">Главная страница</a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#" onclick="loadPage('/page1')">Page 1 <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="loadPage('/page2')">Page 2</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="loadPage('/page3')">Page 3</a>
+                </li>
+
+            </ul>
+        </nav>
+</div>
+
+    <div class="container mt-4">
+        <div id="content">
+            {% block content %}
+            <div class="container text-center"> <!-- Добавлен класс text-center для центрирования текста -->
+                <h1>Добро пожаловать на страницу</h1>
+                <h5>Здесь вы можете начать работу с нашим сервисом</h5>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='ajax.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
