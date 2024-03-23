@@ -12,9 +12,8 @@
 
         <form id="upload_form" method="POST" enctype="multipart/form-data">
             <div id="drop_zone" class="mb-3">
-                <input type="file" name="file" id="file_input" style="display: none;">
                 <label for="file_input">Drag and drop a file here or click to choose</label>
-                <img id="uploaded_image" style="display: none;">
+                <input type="file" name="file" id="file_input" style="display: none;">
             </div>
             <button type="submit" class="btn btn-primary btn-lg">Detect</button>
         </form>
@@ -33,7 +32,7 @@
 
     <script>
         const dropZone = document.getElementById('drop_zone');
-        const uploadedImage = document.getElementById('uploaded_image');
+        const fileInput = document.getElementById('file_input');
 
         dropZone.addEventListener('dragover', (event) => {
             event.preventDefault();
@@ -48,12 +47,14 @@
             event.preventDefault();
             dropZone.style.backgroundColor = '';
             const file = event.dataTransfer.files[0];
-            document.getElementById('file_input').files = event.dataTransfer.files;
+            fileInput.files = event.dataTransfer.files;
 
             const reader = new FileReader();
             reader.onload = function(e) {
+                const uploadedImage = document.createElement('img');
                 uploadedImage.src = e.target.result;
-                uploadedImage.style.display = 'block';
+                uploadedImage.classList.add('img-fluid', 'mt-3');
+                dropZone.appendChild(uploadedImage);
             };
             reader.readAsDataURL(file);
         });
