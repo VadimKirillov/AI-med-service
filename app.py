@@ -15,11 +15,11 @@ app.config['UPLOAD_FOLDER'] = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
 # Настройки для подключения к базе данных PostgreSQL
-DB_NAME = 'Med_logs'
-DB_USER = 'postgres'
-DB_PASSWORD = 'vadim01962'
-DB_HOST = 'localhost'
-DB_PORT = '5432'
+DB_NAME = ''
+DB_USER = ''
+DB_PASSWORD = ''
+DB_HOST = ''
+DB_PORT = ''
 
 
 # Функция для установления соединения с базой данных
@@ -115,7 +115,12 @@ def page1():
 
 @app.route("/logs")
 def page2():
-    return render_template("logs.html")
+    conn = connect_to_db()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM detection_logs")
+    detection_logs = cur.fetchall()
+    conn.close()
+    return render_template("logs.html", detection_logs=detection_logs)
 
 
 @app.route("/info")

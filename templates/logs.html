@@ -6,6 +6,21 @@
 </head>
 <body>
     {% include 'top_menu.html' %}
-    <h1>Тут будет информация о дайком файлах</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Status</th>
+            <th>Process Time</th>
+            <th>Author</th>
+        </tr>
+        {% for log in detection_logs %}
+        <tr>
+            <td>{{ log[0] }}</td>
+            <td>{{ log[1] }}</td>
+            <td>{{ log[2] }}</td>
+            <td>{{ log[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
