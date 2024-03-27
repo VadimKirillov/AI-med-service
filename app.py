@@ -5,12 +5,64 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 import torch
 import os
+import psycopg2
+from psycopg2 import sql
 
 app = Flask(__name__)
 
 app.config['UPLOAD_FOLDER'] = 'static/images'
 # Разрешенные типы файлов
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
+
+# Настройки для подключения к базе данных PostgreSQL
+DB_NAME = 'Med_logs'
+DB_USER = 'postgres'
+DB_PASSWORD = 'vadim01962'
+DB_HOST = 'localhost'
+DB_PORT = '5432'
+
+
+# Функция для установления соединения с базой данных
+def connect_to_db():
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    return conn
+
+
+# Функция для создания таблицы, если она ещё не существует
+def create_table():
+    conn = connect_to_db()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS detection_logs (
+            id SERIAL PRIMARY KEY,
+            status VARCHAR,
+            process_time TIMESTAMP,
+            author VARCHAR
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+create_table()
+
+
+# Функция для записи данных о детекции в базу данных
+def log_detection(status, process_time, author):
+    conn = connect_to_db()
+    cur = conn.cursor()
+    cur.execute(
+        sql.SQL("INSERT INTO detection_logs (status, process_time, author) VALUES (%s, %s, %s)"),
+        (status, process_time, author)
+    )
+    conn.commit()
+    conn.close()
 
 
 def allowed_file(filename):
@@ -47,9 +99,12 @@ def page1():
 
             print(predicted_label)
 
+
             image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
             image_path = os.path.join('static/images', image_filename)
             end_time = datetime.now().isoformat()
+
+            log_detection("Обработано", end_time, 'demo_user')
 
             return render_template("detect.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
                                    image_path=image_path,
