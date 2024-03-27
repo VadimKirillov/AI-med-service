@@ -22,16 +22,16 @@ def base():
     return render_template("base.html")
 
 
-@app.route("/page1", methods=['GET', 'POST'])
+@app.route("/detect", methods=['GET', 'POST'])
 def page1():
     if request.method == 'POST':
         if 'file' not in request.files:
-            return render_template("page1.html", error="No file part")
+            return render_template("detect.html", error="No file part")
 
         file = request.files['file']
 
         if file.filename == '':
-            return render_template("page1.html", error="No selected file")
+            return render_template("detect.html", error="No selected file")
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -51,21 +51,21 @@ def page1():
             image_path = os.path.join('static/images', image_filename)
             end_time = datetime.now().isoformat()
 
-            return render_template("page1.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
+            return render_template("detect.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
                                    image_path=image_path,
                                    start_time=start_time, end_time=end_time)
 
-    return render_template("page1.html")
+    return render_template("detect.html")
 
 
-@app.route("/page2")
+@app.route("/logs")
 def page2():
-    return render_template("page2.html")
+    return render_template("logs.html")
 
 
-@app.route("/page3")
+@app.route("/info")
 def page3():
-    return render_template("page3.html")
+    return render_template("info.html")
 
 
 if __name__ == "__main__":

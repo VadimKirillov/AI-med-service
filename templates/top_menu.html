@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+</head>
+<body>
+     <div class="top-menu">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+<!--            <a class="navbar-brand" href="/">Главная страница</a>-->
+
+            <ul class="navbar-nav mr-auto">
+                 <li class="nav-item active">
+                    <a class="nav-link" href="/" onclick="loadPage('/')">Главная страница <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/detect" onclick="loadPage('/detect')">Распознование <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logs" onclick="loadPage('/logs')">Журнал</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/info" onclick="loadPage('/info')">О проекте</a>
+                </li>
+
+            </ul>
+        </nav>
+</div>
+</body>
+</html>

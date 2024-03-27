@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="static/style.css">
     <link rel="icon" type="image/png" href="static/images/logo.png">
 </head>
-<body>
+{% include 'top_menu.html' %}
     <div class="container mt-4">
         <h1 class="mb-4">COVID-19 Detector</h1>
 
@@ -29,6 +29,7 @@
             {% endif %}
         </div>
     </div>
+
 
     <script>
         const dropZone = document.getElementById('drop_zone');
