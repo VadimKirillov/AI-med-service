@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    {% include 'top_menu_links.html'%}
+</head>
+<body>
+
+{% include 'top_menu.html' %}
+<div class="container">
+    <h1>Авторизация</h1>
+    <form method="POST" action="{{ url_for('login') }}">
+        {{ form.csrf_token }}
+        <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <p>Еще не зарегистрированы? <a href="{{ url_for('register') }}">Зарегистрируйтесь</a></p>
+</div>
+
+</body>
+</html>

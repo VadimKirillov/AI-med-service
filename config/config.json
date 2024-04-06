@@ -1,0 +1,7 @@
+{
+    "DB_NAME": "Med_logs",
+    "DB_USER": "postgres",
+    "DB_PASSWORD": "vadim01962",
+    "DB_HOST": "localhost",
+    "DB_PORT": "5432"
+}

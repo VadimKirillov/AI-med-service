@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>COVID-19 Detector</title>
+    {% include 'top_menu_links.html'%}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/style.css">
     <link rel="icon" type="image/png" href="static/images/logo.png">
@@ -26,6 +27,7 @@
                 <h4>Result: {{ predicted_label }}</h4>
                 <h4>Probability: {{ predicted_prob }}% </h4>
                 <img src="{{ image_path }}" class="img-fluid mt-3" alt="Uploaded Image">
+                <p>Путь к изображению: {{ image_path  }}</p>
             {% endif %}
         </div>
     </div>

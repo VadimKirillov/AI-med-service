@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <style>
+        .top-menu .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar-text {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
      <div class="top-menu">
@@ -17,7 +27,7 @@
                     <a class="nav-link" href="/" onclick="loadPage('/')">Главная страница <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/detect" onclick="loadPage('/detect')">Распознование <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/detect" onclick="loadPage('/detect')">Сервисы <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logs" onclick="loadPage('/logs')">Журнал</a>
@@ -27,7 +37,74 @@
                 </li>
 
             </ul>
+            <div>
+                <span id="usernameDisplay" class="navbar-text"></span>
+            </div>
+            <div>
+                <a id="loginButton" href="{{ url_for('login') }}" class="btn btn-outline-primary">Войти</a>
+                <a id="logoutButton" href="{{ url_for('login') }}" class="btn btn-outline-primary" style="display: none;">Выйти</a>
+            </div>
+
         </nav>
 </div>
+
+    <script>
+        function loadPage(url) {
+            // Добавляем анимацию при нажатии на кнопку
+            const targetTab = document.querySelector("[href='" + url + "']");
+            targetTab.classList.add("animate__animated", "animate__pulse");
+
+            // После завершения анимации удаляем класс анимации
+            targetTab.addEventListener("animationend", function() {
+                targetTab.classList.remove("animate__animated", "animate__pulse");
+            });
+
+            // Здесь ваша логика загрузки страницы
+        }
+    </script>
+<script>
+        function toggleTabs() {
+    const groupName = "{{ session.get('group_name') }}";
+
+    // Получаем ссылки на элементы <li>
+    const homeTab = document.getElementById('homeTab');
+    const testsTab = document.getElementById('testsTab');
+    const questionTab = document.getElementById('questionTab');
+    const statisticsTab = document.getElementById('statisticsTab');
+
+    // Устанавливаем видимость вкладок в зависимости от значения groupName
+    if (groupName === 'user') {
+        homeTab.style.display = 'block';
+        testsTab.style.display = 'block';
+        questionTab.style.display = 'none';
+        statisticsTab.style.display = 'none';
+    } else if (groupName === 'admin') {
+        homeTab.style.display = 'block';
+        testsTab.style.display = 'block';
+        questionTab.style.display = 'block';
+        statisticsTab.style.display = 'block';
+    } else {
+        homeTab.style.display = 'block';
+        testsTab.style.display = 'none';
+        questionTab.style.display = 'none';
+        statisticsTab.style.display = 'none';
+    }
+    }
+        window.onload = toggleTabs;
+        // Получаем значение username из сессии и отображаем его
+        const username = "{{ session.get('username') }}"; // Получаем значение username из сессии
+        if (username && username !== "None") {
+            document.getElementById('usernameDisplay').textContent = username;
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'block';
+        } else {
+            // Если значение username не найдено или равно "None", скрываем соответствующий блок
+            document.getElementById('usernameDisplay').style.display = 'none';
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+
+
+    </script>
 </body>
 </html>

@@ -1,72 +1,106 @@
-from flask import Flask, render_template, request
-from models.scratch import CovidClassifier
-from models.classifier import classify_image
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from sqlalchemy import desc, select, and_
+from nn_models.scratch import CovidClassifier
+from nn_models.classifier import classify_image
 from werkzeug.utils import secure_filename
-from datetime import datetime
-import torch
+from datetime import datetime, timedelta
+from access import group_permission_decorator
+from database import create_tables_if_not_exist
+from forms import *
+from models import *
+import json
 import os
+import random
+import torch
 import psycopg2
 from psycopg2 import sql
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '12345'
 
+app.config['ACCESS_CONFIG'] = json.load(open('config/access.json', 'r'))
 app.config['UPLOAD_FOLDER'] = 'static/images'
+
+# Загрузка конфигурации из файла
+with open('config/config.json', 'r') as f:
+    config = json.load(f)
+
+# Настройка подключения к базе данных
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}".format(
+    **config)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Инициализация экземпляра SQLAlchemy
+db.init_app(app)
+
+# Создание таблиц, если они не существуют
+if not os.path.exists("config/initialized"):
+    with app.app_context():
+        create_tables_if_not_exist()
+        open("config/initialized", "w").close()
+
 # Разрешенные типы файлов
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
-
-# Настройки для подключения к базе данных PostgreSQL
-DB_NAME = ''
-DB_USER = ''
-DB_PASSWORD = ''
-DB_HOST = ''
-DB_PORT = ''
-
-
-# Функция для установления соединения с базой данных
-def connect_to_db():
-    conn = psycopg2.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT
-    )
-    return conn
-
-
-# Функция для создания таблицы, если она ещё не существует
-def create_table():
-    conn = connect_to_db()
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS detection_logs (
-            id SERIAL PRIMARY KEY,
-            status VARCHAR,
-            process_time TIMESTAMP,
-            author VARCHAR
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-
-create_table()
-
-
-# Функция для записи данных о детекции в базу данных
-def log_detection(status, process_time, author):
-    conn = connect_to_db()
-    cur = conn.cursor()
-    cur.execute(
-        sql.SQL("INSERT INTO detection_logs (status, process_time, author) VALUES (%s, %s, %s)"),
-        (status, process_time, author)
-    )
-    conn.commit()
-    conn.close()
 
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        session.clear()
+        form = LoginForm()
+    else:
+        form = LoginForm()
+
+        if form.validate_on_submit():
+            username = form.username.data
+            password = form.password.data
+            user = User.query.filter_by(username=username).first()
+            if user == None:
+                return redirect(url_for('login'))
+            if password == user.password:
+                with open('config/access.json') as f:
+                    data = json.load(f)
+
+                # Поиск соответствия имени пользователя в JSON
+                for group_name, permissions in data.items():
+                    print(group_name)
+                    print(permissions)
+                    if user.role == group_name:
+                        print("IF")
+                        session['group_name'] = group_name
+                        session['username'] = username
+                        print(" session['username']", session['username'])
+                        user = User.query.filter_by(username=username).first()
+                        session['id'] = user.id
+                        print(session['id'])
+                        print(session['group_name'])
+                        return redirect(url_for('base'))
+                else:
+                    print("ELSE")
+                    session['group_name'] = 'unauthorized'
+                    print(session['group_name'])
+                    return redirect(url_for('base'))
+                # Здесь вы можете добавить логику для проверки введенных данных
+                # и аутентификации пользователя
+            else:
+                return redirect(url_for('login'))
+    return render_template('login.html', form=form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, password=form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Your account has been created! You are now able to log in', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
 
 
 @app.route("/")
@@ -75,7 +109,7 @@ def base():
 
 
 @app.route("/detect", methods=['GET', 'POST'])
-def page1():
+def detect():
     if request.method == 'POST':
         if 'file' not in request.files:
             return render_template("detect.html", error="No file part")
@@ -99,12 +133,22 @@ def page1():
 
             print(predicted_label)
 
-
             image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
             image_path = os.path.join('static/images', image_filename)
             end_time = datetime.now().isoformat()
 
-            log_detection("Обработано", end_time, 'demo_user')
+            #log_detection("Обработано", end_time, 'demo_user')
+
+            #session.get('username')
+            new_detection_log = DetectionLogs(status='обработано',
+                                              name_patology=predicted_label,
+                                              percent_patology=predicted_prob,
+                                              start_time=start_time,
+                                              end_time=end_time,
+                                              user_id=1)
+
+            db.session.add(new_detection_log)
+            db.session.commit()
 
             return render_template("detect.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
                                    image_path=image_path,
@@ -114,17 +158,14 @@ def page1():
 
 
 @app.route("/logs")
-def page2():
-    conn = connect_to_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM detection_logs")
-    detection_logs = cur.fetchall()
-    conn.close()
+def logs():
+    detection_logs = DetectionLogs.query.all()
+
     return render_template("logs.html", detection_logs=detection_logs)
 
 
 @app.route("/info")
-def page3():
+def info():
     return render_template("info.html")
 
 

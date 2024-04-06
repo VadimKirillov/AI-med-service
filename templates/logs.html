@@ -2,24 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Информация</title>
+    <title>Журнал</title>
+    {% include 'top_menu_links.html'%}
+    <style>
+        table {
+            width: 80%; /* Ширина таблицы */
+            margin: 0 auto; /* Центрирование таблицы */
+            border-collapse: collapse; /* Удаление внешних границ ячеек */
+        }
+        th, td {
+            padding: 10px; /* Отступ внутри ячеек */
+            border: 1px solid black; /* Границы ячеек */
+            text-align: center; /* Выравнивание текста по центру */
+        }
+        th {
+            background-color: #f2f2f2; /* Фон заголовков столбцов */
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8; /* Цвет фона для четных строк */
+        }
+    </style>
 </head>
 <body>
     {% include 'top_menu.html' %}
-    <table border="1">
+    <h2>Журнал работы сервиса</h2>
+    <table>
         <tr>
             <th>ID</th>
-            <th>Status</th>
-            <th>Process Time</th>
-            <th>Author</th>
+            <th>Статус</th>
+            <th>Название патологии</th>
+            <th>Вероятность патологии</th>
+            <th>Время начала обработки</th>
+            <th>Время окончания обработки</th>
+            <th>Пользователь</th>
         </tr>
         {% for log in detection_logs %}
-        <tr>
-            <td>{{ log[0] }}</td>
-            <td>{{ log[1] }}</td>
-            <td>{{ log[2] }}</td>
-            <td>{{ log[3] }}</td>
-        </tr>
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.status }}</td>
+                <td>{{ log.name_patology }}</td>
+                <td>{{ log.percent_patology }}</td>
+                <td>{{ log.start_time }}</td>
+                <td>{{ log.end_time }}</td>
+                <td>{{ log.user_id }}</td>
+            </tr>
         {% endfor %}
     </table>
 </body>
