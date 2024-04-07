@@ -5,7 +5,7 @@ from nn_models.classifier import classify_image
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from access import group_permission_decorator
-from database import create_tables_if_not_exist
+from database import *
 from forms import *
 from models import *
 import json
@@ -38,6 +38,49 @@ if not os.path.exists("config/initialized"):
     with app.app_context():
         create_tables_if_not_exist()
         open("config/initialized", "w").close()
+
+with app.app_context():
+    if not Modal.query.all():
+        # Добавление тестовых данных в таблицу Modal
+        modal_data = ["КТ", "МРТ", "РГ", "ЭКГ", "Другое"]
+        for modal_name in modal_data:
+            modal = Modal(name=modal_name)
+            db.session.add(modal)
+
+    if not Target.query.all():
+        # Добавление тестовых данных в таблицу Target
+        target_data = ["Грудная полость", "Позвоночник", "Брюшная полость", "Мульти", "Другое"]
+        for target_name in target_data:
+            target = Target(name=target_name)
+            db.session.add(target)
+    if not Pathology.query.all():
+        # Добавление тестовых данных в таблицу Pathology
+        pathology_data = ["COVID-19", "Пневмония", "Рак", "Другое"]
+        for pathology_name in pathology_data:
+            pathology = Pathology(name=pathology_name)
+            db.session.add(pathology)
+
+    if not User.query.all():
+        admin = User(username='admin', password='admin', role='admin')
+        user = User(username='user', password='user', role='user')
+
+        db.session.add(admin)
+        db.session.add(user)
+
+    if not Service.query.all():
+        covid_detector = Service(name='COVID-Classifier', url='covid_detector',
+                                 description='COVID-19 бинарное определение',
+                                 pathology_id=1, target_id=1, modal_id=1)
+
+        covid_segmentator = Service(name='COVID-Segmentator', url='covid_segmentator',
+                                    description='COVID-19 бинарное определение',
+                                    pathology_id=2, target_id=2, modal_id=2)
+
+        db.session.add(covid_detector)
+        db.session.add(covid_segmentator)
+
+    db.session.commit()
+    print("Тестовые данные добавлены в таблицы")
 
 # Разрешенные типы файлов
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
@@ -137,9 +180,9 @@ def detect():
             image_path = os.path.join('static/images', image_filename)
             end_time = datetime.now().isoformat()
 
-            #log_detection("Обработано", end_time, 'demo_user')
+            # log_detection("Обработано", end_time, 'demo_user')
 
-            #session.get('username')
+            # session.get('username')
             new_detection_log = DetectionLogs(status='обработано',
                                               name_patology=predicted_label,
                                               percent_patology=predicted_prob,
@@ -155,6 +198,17 @@ def detect():
                                    start_time=start_time, end_time=end_time)
 
     return render_template("detect.html")
+
+
+@app.route("/services")
+def services():
+    # detection_logs = DetectionLogs.query.all()
+    services_list = Service.query.all()
+    modals = Modal.query.all()
+    targets = Target.query.all()
+    pathologies = Pathology.query.all()
+    return render_template("services.html", services=services_list,
+                           modals=modals, targets=targets, pathologies=pathologies)
 
 
 @app.route("/logs")

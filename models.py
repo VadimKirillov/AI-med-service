@@ -13,6 +13,7 @@ class User(db.Model):
 
 class DetectionLogs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
     status = db.Column(db.String(100), nullable=False)
     name_patology = db.Column(db.String(100), nullable=False)
     percent_patology = db.Column(db.String(100), nullable=True)
@@ -22,6 +23,39 @@ class DetectionLogs(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship('User', backref='detection_logs')
+    service = db.relationship('Service', backref='detection_logs')
+
+
+class Service(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    image_url = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(255), nullable=True)
+
+    modal_id = db.Column(db.Integer, db.ForeignKey('modal.id'), nullable=False)
+    target_id = db.Column(db.Integer, db.ForeignKey('target.id'), nullable=False)
+    pathology_id = db.Column(db.Integer, db.ForeignKey('pathology.id'), nullable=False)
+
+    modal = db.relationship('Modal', backref='service')
+    target = db.relationship('Target', backref='service')
+    pathology = db.relationship('Pathology', backref='service')
+
+
+class Modal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+
+
+class Target(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+
+
+class Pathology(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
 
 
 # def create_tables_if_not_exist():

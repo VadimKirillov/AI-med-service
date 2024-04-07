@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Сервисы</title>
+    <style>
+        .service-card {
+            display: block;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    {% include 'top_menu.html' %}
+    <h1>Список сервисов</h1>
+    <div class="filters">
+        <select id="modalFilter">
+            <option value="">Выберите модальность</option>
+            {% for modal in modals %}
+                <option value="{{ modal.id }}">{{ modal.name }}</option>
+            {% endfor %}
+        </select>
+        <select id="targetFilter">
+            <option value="">Выберите целевую часть</option>
+            {% for target in targets %}
+                <option value="{{ target.id }}">{{ target.name }}</option>
+            {% endfor %}
+        </select>
+        <select id="pathologyFilter">
+            <option value="">Выберите патологию</option>
+            {% for pathology in pathologies %}
+                <option value="{{ pathology.id }}">{{ pathology.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="service-cards">
+        {% for service in services %}
+            <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
+                <h2>{{ service.name }}</h2>
+                <p>Статус: {{ service.status }}</p>
+                <p>Модальность: {{ service.modal.name }}</p>
+                <p>Целевая часть: {{ service.target.name }}</p>
+                <p>Патология: {{ service.pathology.name }}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        const modalFilter = document.getElementById('modalFilter');
+        const targetFilter = document.getElementById('targetFilter');
+        const pathologyFilter = document.getElementById('pathologyFilter');
+
+        const serviceCards = document.querySelectorAll('.service-card');
+
+        modalFilter.addEventListener('change', filterCards);
+        targetFilter.addEventListener('change', filterCards);
+        pathologyFilter.addEventListener('change', filterCards);
+
+        function filterCards() {
+            const selectedModal = modalFilter.value;
+            const selectedTarget = targetFilter.value;
+            const selectedPathology = pathologyFilter.value;
+
+            serviceCards.forEach(card => {
+                const modal = card.getAttribute('data-modal');
+                const target = card.getAttribute('data-target');
+                const pathology = card.getAttribute('data-pathology');
+
+                if(
+                    (!selectedModal || modal === selectedModal) &&
+                    (!selectedTarget || target === selectedTarget) &&
+                    (!selectedPathology || pathology === selectedPathology)
+                ) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
