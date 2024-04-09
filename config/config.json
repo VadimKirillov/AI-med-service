@@ -1,7 +1,7 @@
 {
-    "DB_NAME": "",
+    "DB_NAME": "students",
     "DB_USER": "postgres",
-    "DB_PASSWORD": "",
+    "DB_PASSWORD": "133705",
     "DB_HOST": "localhost",
     "DB_PORT": "5432"
 }

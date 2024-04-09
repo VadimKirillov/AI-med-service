@@ -61,6 +61,27 @@
 
             // Здесь ваша логика загрузки страницы
         }
+
+
+    </script>
+<script>
+        function toggleTabs() {
+    const groupName = "{{ session.get('group_name') }}";
+    }
+        window.onload = toggleTabs;
+        // Получаем значение username из сессии и отображаем его
+        const username = "{{ session.get('username') }}"; // Получаем значение username из сессии
+        if (username && username !== "None") {
+            document.getElementById('usernameDisplay').textContent = username;
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'block';
+        } else {
+            // Если значение username не найдено или равно "None", скрываем соответствующий блок
+            document.getElementById('usernameDisplay').style.display = 'none';
+            document.getElementById('loginButton').style.display = 'block';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+
     </script>
 </body>
 </html>

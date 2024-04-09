@@ -211,6 +211,12 @@ def services():
                            modals=modals, targets=targets, pathologies=pathologies)
 
 
+@app.route("/services/<int:service_id>", methods=["GET", "POST"])
+def display_services(service_id):
+    service = Service.query.get(service_id)
+    return render_template("services_display.html", service=service)
+
+
 @app.route("/logs")
 def logs():
     detection_logs = DetectionLogs.query.all()

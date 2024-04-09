@@ -39,11 +39,14 @@
     <div class="service-cards">
         {% for service in services %}
             <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
+                <a href="/services/{{ service.id }}" class="question-link">
                 <h2>{{ service.name }}</h2>
+                </a>
                 <p>Статус: {{ service.status }}</p>
                 <p>Модальность: {{ service.modal.name }}</p>
                 <p>Целевая часть: {{ service.target.name }}</p>
                 <p>Патология: {{ service.pathology.name }}</p>
+
             </div>
         {% endfor %}
     </div>
