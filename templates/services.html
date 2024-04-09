@@ -11,6 +11,17 @@
             margin-bottom: 10px;
             border-radius: 5px;
         }
+
+        .filters {
+            display: flex;
+            align-items: center; /* Чтобы элементы выровнялись по вертикали */
+            margin-bottom: 10px;
+        }
+
+        .search {
+            margin-left: auto; /* Помещаем поиск в конец строки */
+            margin-right: 20px; /* Добавляем немного отступа справа */
+        }
     </style>
 </head>
 <body>
@@ -35,18 +46,20 @@
                 <option value="{{ pathology.id }}">{{ pathology.name }}</option>
             {% endfor %}
         </select>
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Поиск по названию">
+        </div>
     </div>
     <div class="service-cards">
         {% for service in services %}
             <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
                 <a href="/services/{{ service.id }}" class="question-link">
-                <h2>{{ service.name }}</h2>
+                    <h2>{{ service.name }}</h2>
                 </a>
                 <p>Статус: {{ service.status }}</p>
                 <p>Модальность: {{ service.modal.name }}</p>
                 <p>Целевая часть: {{ service.target.name }}</p>
                 <p>Патология: {{ service.pathology.name }}</p>
-
             </div>
         {% endfor %}
     </div>
@@ -54,28 +67,34 @@
         const modalFilter = document.getElementById('modalFilter');
         const targetFilter = document.getElementById('targetFilter');
         const pathologyFilter = document.getElementById('pathologyFilter');
-
+        const searchInput = document.getElementById('searchInput');
         const serviceCards = document.querySelectorAll('.service-card');
 
-        modalFilter.addEventListener('change', filterCards);
-        targetFilter.addEventListener('change', filterCards);
-        pathologyFilter.addEventListener('change', filterCards);
+        // Добавляем обработчики событий на изменение фильтров и ввод в поле поиска
+        modalFilter.addEventListener('change', filterAndSearch);
+        targetFilter.addEventListener('change', filterAndSearch);
+        pathologyFilter.addEventListener('change', filterAndSearch);
+        searchInput.addEventListener('input', filterAndSearch);
 
-        function filterCards() {
+        // Функция для фильтрации и поиска карточек сервисов
+        function filterAndSearch() {
             const selectedModal = modalFilter.value;
             const selectedTarget = targetFilter.value;
             const selectedPathology = pathologyFilter.value;
+            const searchText = searchInput.value.trim().toLowerCase();
 
             serviceCards.forEach(card => {
                 const modal = card.getAttribute('data-modal');
                 const target = card.getAttribute('data-target');
                 const pathology = card.getAttribute('data-pathology');
+                const serviceName = card.querySelector('h2').textContent.toLowerCase();
 
-                if(
-                    (!selectedModal || modal === selectedModal) &&
-                    (!selectedTarget || target === selectedTarget) &&
-                    (!selectedPathology || pathology === selectedPathology)
-                ) {
+                const modalMatch = !selectedModal || modal === selectedModal;
+                const targetMatch = !selectedTarget || target === selectedTarget;
+                const pathologyMatch = !selectedPathology || pathology === selectedPathology;
+                const searchMatch = serviceName.includes(searchText);
+
+                if (modalMatch && targetMatch && pathologyMatch && searchMatch) {
                     card.style.display = 'block';
                 } else {
                     card.style.display = 'none';

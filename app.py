@@ -214,6 +214,8 @@ def services():
 @app.route("/services/<int:service_id>", methods=["GET", "POST"])
 def display_services(service_id):
     service = Service.query.get(service_id)
+    print(service.modal.name)
+    print(service.image_url)
     return render_template("services_display.html", service=service)
 
 

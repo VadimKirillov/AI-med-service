@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Service Details</title>
 </head>
 <body>
-
+    <h1>{{ service.name }}</h1>
+    <p>Description: {{ service.description }}</p>
+    <p>Модальность: {{ service.modal.name }}</p>
+    <p>Целевая часть: {{ service.target.name }}</p>
+    <p>Патология: {{ service.pathology.name }}</p>
+    {% if service.image_url %}
+        <img src="{{ service.image_url }}" alt="Service Image">
+    {% else %}
+        <p>No image available</p>
+    {% endif %}
 </body>
 </html>
