@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Главная</title>
+
     {% include 'top_menu_links.html'%}
 
     <style>
@@ -90,7 +91,8 @@
         }
     </script>
     <script type="module" src="https://unpkg.com/three@0.138.3/build/three.module.js"></script>
-    <script type="module" src="/static/script_shader.js"></script>
+    <script type="module" src="{{ url_for('static', filename='script_shader.js') }}"></script>
+
     </div>
 
 </body>

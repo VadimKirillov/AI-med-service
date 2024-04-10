@@ -29,6 +29,7 @@
     <table>
         <tr>
             <th>ID</th>
+            <th>Название сервиса</th>
             <th>Статус</th>
             <th>Название патологии</th>
             <th>Вероятность патологии</th>
@@ -39,12 +40,13 @@
         {% for log in detection_logs %}
             <tr>
                 <td>{{ log.id }}</td>
+                <td>{{ log.service.name }}</td>
                 <td>{{ log.status }}</td>
                 <td>{{ log.name_patology }}</td>
                 <td>{{ log.percent_patology }}</td>
                 <td>{{ log.start_time }}</td>
                 <td>{{ log.end_time }}</td>
-                <td>{{ log.user_id }}</td>
+                <td>{{ log.user.username }}</td>
             </tr>
         {% endfor %}
     </table>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COVID-19 Segmentator</title>
+    {% include 'top_menu_links.html'%}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/png" href="static/images/logo.png">
+</head>
+{% include 'top_menu.html' %}
+    <div class="container mt-4">
+        <h1 class="mb-4">COVID-19 Segmentator</h1>
+
+        <form id="upload_form" method="POST" enctype="multipart/form-data">
+            <div id="drop_zone" class="mb-3">
+                <label for="file_input">Drag and drop a file here or click to choose</label>
+                <input type="file" name="file" id="file_input" style="display: none;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="detectButton">Detect</button>
+        </form>
+        <div id="result" class="mt-4" style="display: none;">
+            <h4>Detected Image:</h4>
+            <img id="detectedImage" src="" class="img-fluid mt-3" alt="Detected Image">
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop_zone');
+        const fileInput = document.getElementById('file_input');
+        const detectButton = document.getElementById('detectButton');
+        const resultDiv = document.getElementById('result');
+        const detectedImage = document.getElementById('detectedImage');
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.style.backgroundColor = '#f0f0f0';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '';
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.style.backgroundColor = '';
+            const file = event.dataTransfer.files[0];
+            fileInput.files = event.dataTransfer.files;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const uploadedImage = document.createElement('img');
+                uploadedImage.src = e.target.result;
+                uploadedImage.classList.add('img-fluid', 'mt-3');
+                dropZone.appendChild(uploadedImage);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        detectButton.addEventListener('click', () => {
+            // Показываем блок с результатом
+            resultDiv.style.display = 'block';
+            // Устанавливаем путь к изображению
+            detectedImage.src = 'static/images/segmentator.jpg';
+        });
+    </script>
+</body>
+</html>

@@ -15,7 +15,7 @@ import torch
 import psycopg2
 from psycopg2 import sql
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = '12345'
 
 app.config['ACCESS_CONFIG'] = json.load(open('config/access.json', 'r'))
@@ -152,16 +152,16 @@ def base():
     return render_template("base.html")
 
 
-@app.route("/detect", methods=['GET', 'POST'])
-def detect():
+@app.route("/covid_detector", methods=['GET', 'POST'])
+def covid_detector():
     if request.method == 'POST':
         if 'file' not in request.files:
-            return render_template("detect.html", error="No file part")
+            return render_template("covid_detector.html", error="No file part")
 
         file = request.files['file']
 
         if file.filename == '':
-            return render_template("detect.html", error="No selected file")
+            return render_template("covid_detector.html", error="No selected file")
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -183,22 +183,78 @@ def detect():
 
             # log_detection("Обработано", end_time, 'demo_user')
 
-            # session.get('username')
-            new_detection_log = DetectionLogs(status='обработано',
+            username = session.get('username')
+            user = User.query.filter_by(username=username).first()
+
+            print("user.id", user.id)
+            new_detection_log = DetectionLogs(service_id=1,
+                                              status='обработано',
                                               name_patology=predicted_label,
                                               percent_patology=predicted_prob,
                                               start_time=start_time,
                                               end_time=end_time,
-                                              user_id=1)
+                                              user_id=user.id)
 
             db.session.add(new_detection_log)
             db.session.commit()
 
-            return render_template("detect.html", predicted_label=predicted_label, predicted_prob=predicted_prob,
+            return render_template("covid_detector.html", predicted_label=predicted_label,
+                                   predicted_prob=predicted_prob,
                                    image_path=image_path,
                                    start_time=start_time, end_time=end_time)
 
-    return render_template("detect.html")
+    return render_template("covid_detector.html")
+
+
+@app.route("/covid_segmentator", methods=['GET', 'POST'])
+def covid_segmentator():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return render_template("covid_segmentator.html", error="No file part")
+
+        file = request.files['file']
+
+        if file.filename == '':
+            return render_template("covid_segmentator.html", error="No selected file")
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            model = CovidClassifier()
+            model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+
+            start_time = datetime.now().isoformat()
+            predicted_label = classify_image(file_path, model)[0]
+            predicted_prob = classify_image(file_path, model)[1]
+
+            print(predicted_label)
+
+            image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+            image_path = os.path.join('static/images', image_filename)
+            end_time = datetime.now().isoformat()
+
+            username = session.get('username')
+            user = User.query.filter_by(username=username).first()
+
+            new_detection_log = DetectionLogs(service_id=2,
+                                              status='обработано',
+                                              name_patology=predicted_label,
+                                              percent_patology=predicted_prob,
+                                              start_time=start_time,
+                                              end_time=end_time,
+                                              user_id=user.id)
+
+            db.session.add(new_detection_log)
+            db.session.commit()
+
+            return render_template("covid_segmentator.html", predicted_label=predicted_label,
+                                   predicted_prob=predicted_prob,
+                                   image_path=image_path,
+                                   start_time=start_time, end_time=end_time)
+
+    return render_template("covid_segmentator.html")
 
 
 @app.route("/services")
@@ -214,10 +270,17 @@ def services():
 
 @app.route("/services/<int:service_id>", methods=["GET", "POST"])
 def display_services(service_id):
-    service = Service.query.get(service_id)
-    print(service.modal.name)
-    print(service.image_url)
-    return render_template("services_display.html", service=service)
+    if request.method == 'POST':
+        service = Service.query.get(service_id)
+        print(service.url)
+
+        service.url
+        return redirect(url_for(service.url))
+    else:
+        service = Service.query.get(service_id)
+        print(service.modal.name)
+        print(service.image_url)
+        return render_template("services_display.html", service=service)
 
 
 @app.route("/logs")
