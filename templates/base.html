@@ -1,18 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Главная страница</title>
+    <meta charset="UTF-8">
+    <title>Главная</title>
     {% include 'top_menu_links.html'%}
+
+    <style>
+
+        .canvas-container {
+            width: 50%; /* Ширина контейнера будет занимать 50% от ширины родительского элемента */
+            height: 80vh; /* Высота контейнера будет занимать 80% от высоты окна просмотра */
+            float: left; /* Это позволит контейнеру расположиться слева */
+            position: relative; /* Добавляем position: relative для позиционирования канвас внутри контейнера */
+            margin-top: 50px;
+        }
+        canvas {
+            width: 100%; /* Канва будет занимать 100% ширины контейнера */
+            height: 100%; /* Канва будет занимать 100% высоты контейнера */
+            position: absolute; /* Позиционируем канвас абсолютным образом внутри контейнера */
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+    </style>
+
 </head>
 <body>
-{% include 'top_menu.html' %}
-    <div class="container mt-4">
-        <div id="content">
-            <div class="container text-center">
-                <h1>Добро пожаловать на страницу</h1>
-                <h5>Здесь вы можете начать работу с нашим сервисом</h5>
-            </div>
-        </div>
+
+    {% include 'top_menu.html' %}
+    <div class="canvas-container">
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.138.0/build/three.module.js",
+                "OrbitControls": "https://unpkg.com/three@0.138.0/examples/jsm/controls/OrbitControls.js"
+            }
+        }
+    </script>
+        <script type="x-shader/x-vertex" id="vertexshader">
+        // attribute float aOrder;
+        uniform float uTime;
+        varying vec2 vUv;
+        varying float vOrder;
+
+        #define PI 3.14159265359
+
+        void main() {
+            vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+
+            vec2 dist = vec2(modelPosition.x, modelPosition.z);
+            float radius = sin(uTime * 0.5);
+            float elevation = 0.7 * sin(-PI * length(dist) * 3.0 + uTime * 2.7);
+
+            modelPosition.y += elevation * 0.1;
+
+            vec4 viewPosition = viewMatrix * modelPosition;
+
+            gl_Position = projectionMatrix * viewPosition;
+
+            vUv = uv;
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="fragment-dot">
+        varying vec2 vUv;
+
+        void main() {
+            float strength = 1.0 - step(0.5, (step(0.15, mod(vUv.y * 15.15, 1.0)) + step(0.15, mod(vUv.x * 15.15, 1.0))));
+            vec3 color = vec3(0.2, 0.5, 1.0);
+            gl_FragColor = vec4(strength * color, strength);
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="fragment-line">
+        varying vec2 vUv;
+        uniform vec3 uColor;
+
+        void main() {
+            float strength = 1.0 - step(0.1, mod(vUv.y * 15.1, 1.0));
+            vec3 color = uColor;
+            gl_FragColor = vec4(strength * color, strength);
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="fragment-grid">
+        varying vec2 vUv;
+
+        void main() {
+            float strength = 1.0 - step(0.1, mod(vUv.y * 15.1, 1.0)) * step(0.1, mod(vUv.x * 15.1, 1.0));
+            vec3 color = vec3(0.3, 0.8, 1.00);
+            gl_FragColor = vec4(strength * color, strength);
+        }
+    </script>
+    <script type="module" src="https://unpkg.com/three@0.138.3/build/three.module.js"></script>
+    <script type="module" src="/static/script_shader.js"></script>
     </div>
 
 </body>

@@ -53,6 +53,7 @@ with app.app_context():
         for target_name in target_data:
             target = Target(name=target_name)
             db.session.add(target)
+
     if not Pathology.query.all():
         # Добавление тестовых данных в таблицу Pathology
         pathology_data = ["COVID-19", "Пневмония", "Рак", "Другое"]

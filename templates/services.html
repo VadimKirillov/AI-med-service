@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Сервисы</title>
+    {% include 'top_menu_links.html'%}
     <style>
         .service-card {
             display: block;
@@ -29,19 +30,19 @@
     <h1>Список сервисов</h1>
     <div class="filters">
         <select id="modalFilter">
-            <option value="">Выберите модальность</option>
+            <option value="">Все модальности</option>
             {% for modal in modals %}
                 <option value="{{ modal.id }}">{{ modal.name }}</option>
             {% endfor %}
         </select>
         <select id="targetFilter">
-            <option value="">Выберите целевую часть</option>
+            <option value="">Все целевые органы</option>
             {% for target in targets %}
                 <option value="{{ target.id }}">{{ target.name }}</option>
             {% endfor %}
         </select>
         <select id="pathologyFilter">
-            <option value="">Выберите патологию</option>
+            <option value="">Все патологии</option>
             {% for pathology in pathologies %}
                 <option value="{{ pathology.id }}">{{ pathology.name }}</option>
             {% endfor %}
