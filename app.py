@@ -56,14 +56,14 @@ with app.app_context():
 
     if not Target.query.all():
         # Добавление тестовых данных в таблицу Target
-        target_data = ["Грудная полость", "Позвоночник", "Брюшная полость", "Мульти", "Другое"]
+        target_data = ["Грудная полость", "Мозг", "Позвоночник", "Брюшная полость", "Мульти", "Другое"]
         for target_name in target_data:
             target = Target(name=target_name)
             db.session.add(target)
 
     if not Pathology.query.all():
         # Добавление тестовых данных в таблицу Pathology
-        pathology_data = ["COVID-19", "Пневмония", "Рак", "Другое"]
+        pathology_data = ["COVID-19", "Пневмония", "Опухоль", "Рак", "Другое"]
         for pathology_name in pathology_data:
             pathology = Pathology(name=pathology_name)
             db.session.add(pathology)
@@ -78,14 +78,22 @@ with app.app_context():
     if not Service.query.all():
         covid_detector = Service(name='COVID-Classifier', url='covid_detector',
                                  description='COVID-19 бинарное определение',
-                                 pathology_id=1, target_id=1, modal_id=1)
+                                 image_url='/static/images/covid_detector_logo.png',
+                                 pathology_id=1, target_id=1, modal_id=3)
 
         covid_segmentator = Service(name='COVID-Segmentator', url='covid_segmentator',
-                                    description='COVID-19 бинарное определение',
-                                    pathology_id=2, target_id=2, modal_id=2)
+                                    image_url='/static/images/covid_segmentator_logo.png',
+                                    description='COVID-19 сегментация лёгких и поражённых областей',
+                                    pathology_id=1, target_id=1, modal_id=3)
+
+        brain_tumor_classifier = Service(name='Brain_Tumor-Detector', url='brain_tumor_detector',
+                                         image_url='/static/images/brain_tumor_logo.png',
+                                         description='Определение опухоли в мозге',
+                                         pathology_id=3, target_id=2, modal_id=1)
 
         db.session.add(covid_detector)
         db.session.add(covid_segmentator)
+        db.session.add(brain_tumor_classifier)
 
     db.session.commit()
     print("Тестовые данные добавлены в таблицы")
@@ -220,7 +228,66 @@ def covid_detector():
 
     return render_template("covid_detector.html")
 
+@app.route("/brain_tumor_detector", methods=['GET', 'POST'])
+def brain_tumor_detector():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return render_template("brain_tumor_detector.html", error="No file part")
 
+        file = request.files['file']
+
+        if file.filename == '':
+            return render_template("brain_tumor_detector.html", error="No selected file")
+
+        # if file.filename.lower().endswith('.dcm'):
+        #     # Если файл DICOM, вызываем функцию для его обработки
+        #     tmp_path = dcm_to_jpg(file)
+        #     return render_template("covid_detector.html", image_path = tmp_path)  # Можете добавить здесь какое-то сообщение или просто вернуть шаблон
+
+        if file and allowed_file(file.filename):
+            if file.filename.lower().endswith('.dcm'):
+                file_path = dcm_to_jpg(file)
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+
+            model = CovidClassifier()
+            model.load_state_dict(torch.load('static/brain_tumor_classifier_weights.pth'))
+
+            start_time = datetime.now().isoformat()
+            predicted_label = classify_image(file_path, model)[0]
+            predicted_prob = classify_image(file_path, model)[1]
+
+            print(predicted_label)
+
+            image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+            image_path = os.path.join('static/images', image_filename)
+            end_time = datetime.now().isoformat()
+
+            # log_detection("Обработано", end_time, 'demo_user')
+
+            username = session.get('username')
+            user = User.query.filter_by(username=username).first()
+
+            print("user.id", user.id)
+            new_detection_log = DetectionLogs(service_id=3,
+                                              status='обработано',
+                                              name_patology=predicted_label,
+                                              percent_patology=predicted_prob,
+                                              start_time=start_time,
+                                              end_time=end_time,
+                                              user_id=user.id)
+
+            db.session.add(new_detection_log)
+            db.session.commit()
+
+            return render_template("brain_tumor_detector.html", predicted_label=predicted_label,
+                                   predicted_prob=predicted_prob,
+                                   image_path=image_path,
+                                   start_time=start_time, end_time=end_time)
+
+    return render_template("brain_tumor_detector.html")
 @app.route("/covid_segmentator", methods=['GET', 'POST'])
 def covid_segmentator():
     if request.method == 'POST':
@@ -307,6 +374,8 @@ def info():
 
 def dcm_to_jpg(path):
     ds = pydicom.dcmread(path, force=True)
+    print(ds.Modality)
+
     # Convert DICOM to PIL Image
     if ds.Modality == "CT":
         new_image = ds.pixel_array.astype(float)
@@ -320,6 +389,7 @@ def dcm_to_jpg(path):
         return path
     else:
         return "error modality"
+
 
 if __name__ == "__main__":
     app.run(debug=True)
