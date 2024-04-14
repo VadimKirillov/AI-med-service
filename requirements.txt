@@ -1,0 +1,15 @@
+Flask==3.0.3
+flask_sqlalchemy==3.1.1
+flask_wtf==1.2.1
+matplotlib==3.8.4
+numpy==1.26.4
+Pillow==10.3.0
+psycopg2==2.9.9
+pydicom==2.4.4
+pylibjpeg==2.0.0
+SQLAlchemy==2.0.29
+torch==2.2.2
+torch_vision==0.1.6.dev0
+torchvision==0.17.2
+Werkzeug==3.0.2
+WTForms==3.1.2
