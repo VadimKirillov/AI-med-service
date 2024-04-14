@@ -27,6 +27,7 @@
                 <h4>Result: {{ predicted_label }}</h4>
                 <h4>Probability: {{ predicted_prob }}% </h4>
                 <img src="{{ image_path }}" class="img-fluid mt-3" alt="Uploaded Image">
+                <h4>Путь: {{ image_path }}% </h4>
             {% endif %}
         </div>
     </div>
@@ -61,19 +62,6 @@
             reader.readAsDataURL(file);
         });
     </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script>
-    document.getElementById('export_pdf').addEventListener('click', function () {
-        const pdf = new jsPDF();
-        const content = document.querySelector('.container');
-
-        pdf.html(content, {
-            callback: function (pdf) {
-                pdf.save('report.pdf');
-            }
-        });
-    });
-</script>
 
 </body>
 </html>

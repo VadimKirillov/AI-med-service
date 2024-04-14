@@ -12,8 +12,15 @@ import json
 import os
 import random
 import torch
+import numpy as np
 import psycopg2
 from psycopg2 import sql
+import pylibjpeg
+import pydicom
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Load DICOM file
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = '12345'
@@ -84,7 +91,7 @@ with app.app_context():
     print("Тестовые данные добавлены в таблицы")
 
 # Разрешенные типы файлов
-ALLOWED_EXTENSIONS = {'png', 'jpg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'dcm'}
 
 
 def allowed_file(filename):
@@ -163,10 +170,18 @@ def covid_detector():
         if file.filename == '':
             return render_template("covid_detector.html", error="No selected file")
 
+        # if file.filename.lower().endswith('.dcm'):
+        #     # Если файл DICOM, вызываем функцию для его обработки
+        #     tmp_path = dcm_to_jpg(file)
+        #     return render_template("covid_detector.html", image_path = tmp_path)  # Можете добавить здесь какое-то сообщение или просто вернуть шаблон
+
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
+            if file.filename.lower().endswith('.dcm'):
+                file_path = dcm_to_jpg(file)
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
 
             model = CovidClassifier()
             model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
@@ -272,14 +287,9 @@ def services():
 def display_services(service_id):
     if request.method == 'POST':
         service = Service.query.get(service_id)
-        print(service.url)
-
-        service.url
         return redirect(url_for(service.url))
     else:
         service = Service.query.get(service_id)
-        print(service.modal.name)
-        print(service.image_url)
         return render_template("services_display.html", service=service)
 
 
@@ -294,6 +304,22 @@ def logs():
 def info():
     return render_template("info.html")
 
+
+def dcm_to_jpg(path):
+    ds = pydicom.dcmread(path, force=True)
+    # Convert DICOM to PIL Image
+    if ds.Modality == "CT":
+        new_image = ds.pixel_array.astype(float)
+        scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
+        scaled_image = np.uint8(scaled_image)
+        final_image = Image.fromarray(scaled_image)
+        # final_image.show()
+        # убираем расширение .dcm path[:-4]))
+        path = "static/images/test_image.png"
+        final_image.save(path)
+        return path
+    else:
+        return "error modality"
 
 if __name__ == "__main__":
     app.run(debug=True)
