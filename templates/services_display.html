@@ -3,42 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <title>Service Details</title>
+    {% include 'top_menu_links.html'%}
     <style>
-        /* Стилизация кнопки */
-        .detect-button {
-            background-color: #4CAF50; /* Зеленый цвет фона */
-            border: none; /* Убираем границы */
-            color: white; /* Белый цвет текста */
-            padding: 15px 32px; /* Отступы вокруг текста */
-            text-align: center; /* Выравнивание текста по центру */
-            text-decoration: none; /* Убираем подчеркивание текста */
-            display: inline-block; /* Отображаем кнопку как блочный элемент */
-            font-size: 16px; /* Размер текста */
-            margin: 4px 2px; /* Отступы от элементов соседних */
-            cursor: pointer; /* Изменяем курсор при наведении */
-            border-radius: 10px; /* Скругляем углы кнопки */
+        /* ваш CSS */
+        /* Обертка для контента */
+        .content-wrapper {
+            display: flex; /* Располагаем элементы в строку */
         }
 
-        /* Стилизация при наведении */
-        .detect-button:hover {
-            background-color: #45a049; /* Темно-зеленый цвет фона */
+        /* Картинка слева */
+        .image-container {
+            flex: 0 0 auto; /* Отключаем растяжение, оставляем фиксированную ширину */
+            margin-right: 20px; /* Добавляем отступ справа */
+            margin-left: 200px;
         }
+
+        /* Описание и информация о сервисе справа */
+        .info-container {
+            flex: 1; /* Растягиваем на всю оставшуюся ширину */
+            margin-right: 20px; /* Добавляем отступ справа */
+        }
+
+        /* Стили для вкладок меню */
+        .tabs {
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+            background-color: #f9f9f9;
+            display: flex; /* Располагаем вкладки на одной строке */
+            justify-content: center; /* Выравниваем по центру */
+            padding: 10px 0; /* Добавляем немного отступа сверху и снизу */
+        }
+
+        .tab-links {
+            display: flex; /* Располагаем кнопки внутри .tabs в строчку */
+        }
+
+        .tab-links button {
+            background-color: inherit;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+        }
+
+        .tab-links button:hover {
+            background-color: #ddd;
+        }
+
+        .tab-links button.active {
+            background-color: #ccc;
+        }
+
+        /* Скрытый контент вкладок */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border-top: none;
+        }
+
+        /* CSS для отображения активной вкладки */
+        .tab-content.active {
+            display: block;
+        }
+
+        .detect-button {
+            margin-left: auto; /* Помещаем кнопку в крайнем правом положении */
+            margin-right: 350px; /* Добавляем отступ справа */
+    background-color: #ff5f5f; /* Красный цвет фона */
+    border: none; /* Убираем границы */
+    color: white; /* Белый цвет текста */
+    padding: 15px 32px; /* Отступы вокруг текста */
+    text-align: center; /* Выравнивание текста по центру */
+    text-decoration: none; /* Убираем подчеркивание текста */
+    display: inline-block; /* Отображаем кнопку как блочный элемент */
+    font-size: 16px; /* Размер текста */
+    border-radius: 10px; /* Скругляем углы кнопки */
+    transition: background-color 0.3s; /* Плавное изменение цвета фона при наведении */
+    cursor: pointer; /* Изменяем курсор при наведении */
+        }
+
+/* Стилизация при наведении на кнопку "Detected" */
+.detected-button:hover {
+    background-color: #ff7f7f; /* Более светлый красный цвет фона при наведении */
+}
+
     </style>
 </head>
 <body>
+{% include 'top_menu.html' %}
     <h1>{{ service.name }}</h1>
-    <p>Description: {{ service.description }}</p>
-    <p>Модальность: {{ service.modal.name }}</p>
-    <p>Целевая часть: {{ service.target.name }}</p>
-    <p>Патология: {{ service.pathology.name }}</p>
-    {% if service.image_url %}
-        <img src="{{ service.image_url }}" alt="Service Image">
-    {% else %}
-        <p>No image available</p>
-    {% endif %}
-    <form method="post">
-        <!-- Используем класс для кнопки -->
-        <button class="detect-button" type="submit">Detect</button>
-    </form>
+    <div class="content-wrapper">
+        <div class="image-container">
+            {% if service.image_url %}
+                <img src="{{ service.image_url }}" alt="Service Image">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+        </div>
+        <div class="info-container">
+            <p>Description: {{ service.description }}</p>
+            <p>Модальность: {{ service.modal.name }}</p>
+            <p>Целевая часть: {{ service.target.name }}</p>
+            <p>Патология: {{ service.pathology.name }}</p>
+        </div>
+        <form method="post">
+            <!-- Используем класс для кнопки -->
+            <button class="detect-button" type="submit">Detect</button>
+        </form>
+    </div>
+
+    <!-- Добавление вкладок меню -->
+    <div class="tabs">
+        <div class="tab-links">
+            <button class="tab-link active" onclick="openTab(event, 'info')">Краткая информация</button>
+            <button class="tab-link" onclick="openTab(event, 'purpose')">Назначение и указания по применению</button>
+            <button class="tab-link" onclick="openTab(event, 'validation')">Валидация и производительность</button>
+            <button class="tab-link" onclick="openTab(event, 'warnings')">Предупреждения</button>
+        </div>
+    </div>
+
+    <!-- Скрытый контент вкладок -->
+    <div id="info" class="tab-content active">
+        <h2>Краткая информация</h2>
+        <p>Ваш текст для краткой информации здесь.</p>
+    </div>
+    <div id="purpose" class="tab-content">
+        <h2>Назначение и указания по применению</h2>
+        <p>Ваш текст для назначения и указаний по применению здесь.</p>
+    </div>
+    <div id="validation" class="tab-content">
+        <h2>Валидация и производительность</h2>
+        <p>Ваш текст для валидации и производительности здесь.</p>
+    </div>
+    <div id="warnings" class="tab-content">
+        <h2>Предупреждения</h2>
+        <p>Ваш текст для предупреждений здесь.</p>
+    </div>
+
+    <script>
+        // JavaScript для управления вкладками
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
 </body>
 </html>
