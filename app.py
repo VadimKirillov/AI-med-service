@@ -174,6 +174,9 @@ def covid_detector():
         if action == 'detect':
             file = request.files['file']
 
+            if 'username' not in session:
+                return redirect(url_for('login'))
+
             if file.filename == '':
                 return render_template("covid_detector.html", error="No selected file")
 
@@ -414,6 +417,9 @@ def logs():
 
 @app.route("/journal")
 def journal():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
     modals = Modal.query.all()
     targets = Target.query.all()
     pathologies = Pathology.query.all()
