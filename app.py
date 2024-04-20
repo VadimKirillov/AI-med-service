@@ -170,63 +170,94 @@ def base():
 @app.route("/covid_detector", methods=['GET', 'POST'])
 def covid_detector():
     if request.method == 'POST':
-        if 'file' not in request.files:
-            return render_template("covid_detector.html", error="No file part")
+        action = request.form.get('action')
+        if action == 'detect':
+            file = request.files['file']
 
-        file = request.files['file']
+            if file.filename == '':
+                return render_template("covid_detector.html", error="No selected file")
 
-        if file.filename == '':
-            return render_template("covid_detector.html", error="No selected file")
+            if not allowed_file(file.filename):
+                return render_template("covid_detector.html", error="Not allowed type")
 
-        # if file.filename.lower().endswith('.dcm'):
-        #     # Если файл DICOM, вызываем функцию для его обработки
-        #     tmp_path = dcm_to_jpg(file)
-        #     return render_template("covid_detector.html", image_path = tmp_path)  # Можете добавить здесь какое-то сообщение или просто вернуть шаблон
-
-        if file and allowed_file(file.filename):
             if file.filename.lower().endswith('.dcm'):
                 file_path = dcm_to_jpg(file)
             else:
                 filename = secure_filename(file.filename)
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
+            try:
+                model = CovidClassifier()
+                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
 
-            model = CovidClassifier()
-            model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                start_time = datetime.now().isoformat()
+                predicted_label = classify_image(file_path, model)[0]
+                predicted_prob = classify_image(file_path, model)[1]
 
-            start_time = datetime.now().isoformat()
-            predicted_label = classify_image(file_path, model)[0]
-            predicted_prob = classify_image(file_path, model)[1]
+                print(predicted_label)
 
-            print(predicted_label)
+                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+                image_path = os.path.join('static/images', image_filename)
+                print("image_path", image_path)
+                end_time = datetime.now().isoformat()
 
-            image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
-            image_path = os.path.join('static/images', image_filename)
-            end_time = datetime.now().isoformat()
+                username = session.get('username')
+                user = User.query.filter_by(username=username).first()
 
-            # log_detection("Обработано", end_time, 'demo_user')
+                print("user.id", user.id)
+                new_detection_log = DetectionLogs(service_id=1,
+                                                  status='обработано',
+                                                  name_patology=predicted_label,
+                                                  percent_patology=predicted_prob,
+                                                  start_time=start_time,
+                                                  end_time=end_time,
+                                                  user_id=user.id)
 
-            username = session.get('username')
-            user = User.query.filter_by(username=username).first()
+                db.session.add(new_detection_log)
+                db.session.commit()
 
-            print("user.id", user.id)
-            new_detection_log = DetectionLogs(service_id=1,
-                                              status='обработано',
-                                              name_patology=predicted_label,
-                                              percent_patology=predicted_prob,
-                                              start_time=start_time,
-                                              end_time=end_time,
-                                              user_id=user.id)
+                return render_template("covid_detector.html", predicted_label=predicted_label,
+                                       predicted_prob=predicted_prob,
+                                       image_path=image_path,
+                                       start_time=start_time, end_time=end_time)
+            except RuntimeError as e:
+                return render_template("covid_detector.html", error="Incorrect shape")
+        elif action == 'save':
+            # user = User.query.filter_by(username='username').first()
+            print("session[id] ", session['id'])
+            service = Service.query.filter_by(name='COVID-Classifier').first()
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            predicted_label = request.form.get('predicted_label')
+            predicted_prob = request.form.get('predicted_prob')
+            image_path = request.form.get('image_path')
+            image_path = image_path.replace('\\', '/')
+            # Создать новую запись в таблице Journal
+            new_journal_entry = Journal(
+                service_id=service.id,
+                user_id=session['id'],
+                service_result=predicted_label,
+                percent_patology=predicted_prob,
+                start_time=start_time,
+                end_time=end_time,
+                input_image_url=image_path
+                # output_image_url='output_image_url_value'
+            )
 
-            db.session.add(new_detection_log)
+            # Добавить запись в сессию и сохранить в базе данных
+            db.session.add(new_journal_entry)
             db.session.commit()
-
-            return render_template("covid_detector.html", predicted_label=predicted_label,
-                                   predicted_prob=predicted_prob,
-                                   image_path=image_path,
-                                   start_time=start_time, end_time=end_time)
-
+            return redirect(url_for('COVID_Classifier', journal_id=new_journal_entry.id))
+        elif action == 'feedback':
+            # Обработка запроса на обратную связь
+            print("feedback")
     return render_template("covid_detector.html")
+
+
+@app.route("/covid_detector/<int:journal_id>", methods=['GET', 'POST'])
+def COVID_Classifier(journal_id):
+    return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
+
 
 @app.route("/brain_tumor_detector", methods=['GET', 'POST'])
 def brain_tumor_detector():
@@ -288,6 +319,8 @@ def brain_tumor_detector():
                                    start_time=start_time, end_time=end_time)
 
     return render_template("brain_tumor_detector.html")
+
+
 @app.route("/covid_segmentator", methods=['GET', 'POST'])
 def covid_segmentator():
     if request.method == 'POST':
@@ -367,6 +400,18 @@ def logs():
     return render_template("logs.html", detection_logs=detection_logs)
 
 
+@app.route("/journal")
+def journal():
+
+    modals = Modal.query.all()
+    targets = Target.query.all()
+    pathologies = Pathology.query.all()
+    journal_list = Journal.query.filter_by(user_id=session['id']).all()
+    return render_template("journal.html", journal_list=journal_list,
+                           modals=modals, targets=targets,
+                           pathologies=pathologies)
+
+
 @app.route("/info")
 def info():
     return render_template("info.html")
@@ -382,9 +427,7 @@ def dcm_to_jpg(path):
         scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
         scaled_image = np.uint8(scaled_image)
         final_image = Image.fromarray(scaled_image)
-        # final_image.show()
-        # убираем расширение .dcm path[:-4]))
-        path = "static/images/test_image.png"
+        path = "static/images/test_image.png"  # TODO сделать нормальный путь для записи dicom файлов
         final_image.save(path)
         return path
     else:

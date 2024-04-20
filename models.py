@@ -58,9 +58,19 @@ class Pathology(db.Model):
     name = db.Column(db.String(255), unique=True, nullable=False)
 
 
-# def create_tables_if_not_exist():
-#     engine = db.engine()
-#     if not engine.dialect.has_table(engine, 'user') or \
-#             not engine.dialect.has_table(engine, 'detection_logs'):
-#         db.create_all()
-#         print("Таблицы созданы.")
+class Journal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    service_result = db.Column(db.String(100), nullable=True)
+    percent_patology = db.Column(db.String(100), nullable=True)
+
+    start_time = db.Column(db.DateTime, nullable=True)
+    end_time = db.Column(db.DateTime, nullable=True)
+
+    input_image_url = db.Column(db.Text, nullable=True)
+    output_image_url = db.Column(db.Text, nullable=True)
+
+    user = db.relationship('User', backref='journal')
+    service = db.relationship('Service', backref='journal')

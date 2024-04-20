@@ -6,7 +6,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/style.css">
     <link rel="icon" type="image/png" href="static/images/logo.png">
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="static/error_script.js"></script>
+
 </head>
+<body>
+
 {% include 'top_menu.html' %}
     <div class="container mt-4">
         <h1 class="mb-4">COVID-19 Detector</h1>
@@ -16,21 +21,32 @@
                 <label for="file_input">Drag and drop a file here or click to choose</label>
                 <input type="file" name="file" id="file_input" style="display: none;">
             </div>
-            <button type="submit" class="btn btn-primary btn-lg">Detect</button>
+            <button type="submit" class="btn btn-primary btn-lg" name="action" value="detect">Detect</button>
         </form>
-        <div class="mt-4">
             {% if error %}
-                <p class="text-danger">{{ error }}</p>
+                <script>
+                    showError('{{error}}');
+                </script>
             {% elif predicted_label %}
                 <p>Start time: {{ start_time }}</p>
                 <p>End time: {{ end_time }}</p>
                 <h4>Result: {{ predicted_label }}</h4>
                 <h4>Probability: {{ predicted_prob }}% </h4>
                 <img src="{{ image_path }}" class="img-fluid mt-3" alt="Uploaded Image">
-                <h4>Путь: {{ image_path }}% </h4>
+<!--                <input type="hidden" id="action_input" name="action">-->
+             <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
+                   <input type="hidden" name="start_time" value="{{ start_time }}">
+                   <input type="hidden" name="end_time" value="{{ end_time }}">
+                   <input type="hidden" name="predicted_label" value="{{ predicted_label }}">
+                   <input type="hidden" name="predicted_prob" value="{{ predicted_prob }}">
+                   <input type="hidden" name="image_path" value="{{ image_path }}">
+                 <div class="mt-4">
+                    <button type="submit" class="btn btn-success mr-2" id="save_button" name="action" value="save">Сохранить</button>
+                    <button type="submit" class="btn btn-info" id="feedback_button" name="action" value="feedback">Обратная связь</button>
+                </div>
+             </form>
             {% endif %}
         </div>
-    </div>
 
 
     <script>
@@ -62,6 +78,5 @@
             reader.readAsDataURL(file);
         });
     </script>
-
 </body>
 </html>

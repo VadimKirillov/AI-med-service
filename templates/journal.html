@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="keywords" content="">
     <meta name="description" content="">
-    <title>Сервисы</title>
+    <title>Журнал</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
     <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
     <script class="u-script" type="text/javascript" src="static/jquery.js" defer=""></script>
@@ -93,7 +93,7 @@
 
     <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
         <div class="u-clearfix u-sheet u-sheet-1">
-            <h1>Список сервисов</h1>
+            <h1>Журнал</h1>
             <div class="filters">
                 <select id="modalFilter">
                     <option value="">Все модальности</option>
@@ -113,21 +113,19 @@
                     <option value="{{ pathology.id }}">{{ pathology.name }}</option>
                     {% endfor %}
                     </select>
-                    <div class="search">
-                        <input type="text" id="searchInput" placeholder="Поиск по названию">
-                    </div>
+
                     </div>
                     <div class="service-cards">
-                    {% for service in services %}
-                        <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
-                        <a href="/services/{{ service.id }}" class="question-link">
-                        <h2>{{ service.name }}</h2>
-                        </a>
-                        <p>Статус: {{ service.status }}</p>
-                        <p>Модальность: {{ service.modal.name }}</p>
-                        <p>Целевая часть: {{ service.target.name }}</p>
-                        <p>Патология: {{ service.pathology.name }}</p>
-                        </div>
+                    {% for journal in journal_list %}
+                    <div class="service-card" data-modal="{{ journal.service.modal.id }}" data-target="{{ journal.service.target.id }}" data-pathology="{{ journal.service.pathology.id }}">
+                    <a href="/{{journal.service.url}}/{{ journal.id }}" class="question-link">
+                    <h2>{{ journal.service.name }}</h2>
+                    </a>
+                        <p>Статус: {{ journal.service.status }}</p>
+                        <p>Модальность: {{ journal.service.modal.name }}</p>
+                        <p>Целевая часть: {{ journal.service.target.name }}</p>
+                        <p>Патология: {{ journal.service.pathology.name }}</p>
+                    </div>
                     {% endfor %}
                     </div>
                     </div>
@@ -148,19 +146,16 @@
                         const modalFilter = document.getElementById('modalFilter');
                         const targetFilter = document.getElementById('targetFilter');
                         const pathologyFilter = document.getElementById('pathologyFilter');
-                        const searchInput = document.getElementById('searchInput');
                         const serviceCards = document.querySelectorAll('.service-card');
 
                         modalFilter.addEventListener('change', filterAndSearch);
                         targetFilter.addEventListener('change', filterAndSearch);
                         pathologyFilter.addEventListener('change', filterAndSearch);
-                        searchInput.addEventListener('input', filterAndSearch);
 
                         function filterAndSearch() {
                             const selectedModal = modalFilter.value;
                             const selectedTarget = targetFilter.value;
                             const selectedPathology = pathologyFilter.value;
-                            const searchText = searchInput.value.trim().toLowerCase();
 
                             serviceCards.forEach(card => {
                                 const modal = card.getAttribute('data-modal');
