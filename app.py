@@ -248,15 +248,27 @@ def covid_detector():
             db.session.add(new_journal_entry)
             db.session.commit()
             return redirect(url_for('COVID_Classifier', journal_id=new_journal_entry.id))
-        elif action == 'feedback':
-            # Обработка запроса на обратную связь
-            print("feedback")
+
     return render_template("covid_detector.html")
 
 
 @app.route("/covid_detector/<int:journal_id>", methods=['GET', 'POST'])
 def COVID_Classifier(journal_id):
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'feedback':
+            print("feedback")
+            return redirect(url_for('Feedback', journal_id=journal_id))
+        return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
+
     return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
+
+
+@app.route("/feedback", methods=['GET', 'POST'])
+def Feedback():
+    journal_id = request.args.get('journal_id')
+    print("journal_id", journal_id)
+    return render_template("feedback.html", journal_id=journal_id)
 
 
 @app.route("/brain_tumor_detector", methods=['GET', 'POST'])
@@ -402,7 +414,6 @@ def logs():
 
 @app.route("/journal")
 def journal():
-
     modals = Modal.query.all()
     targets = Target.query.all()
     pathologies = Pathology.query.all()
