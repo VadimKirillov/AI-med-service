@@ -1,9 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html style="font-size: 16px;" lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
     <title>Сервисы</title>
-    {% include 'top_menu_links.html'%}
+    <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
+    <script class="u-script" type="text/javascript" src="static/jquery.js" defer=""></script>
+    <script class="u-script" type="text/javascript" src="static/nicepage.js" defer=""></script>
+    <meta name="generator" content="Nicepage 6.7.6, nicepage.com">
+    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+    <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+    <script type="application/ld+json">{
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "Site2",
+        "logo": "static/images/585px-MIREA_Gerb_2021.png"
+    }</script>
+    <meta name="theme-color" content="#411ae7">
     <style>
         .service-card {
             display: block;
@@ -15,93 +31,154 @@
 
         .filters {
             display: flex;
-            align-items: center; /* Чтобы элементы выровнялись по вертикали */
+            align-items: center;
             margin-bottom: 10px;
+            background-color: #0000004d;
+            border: 1px solid #ddd;
+            padding: 5px;
+            font-size: 16px;
+            color: #333;
         }
 
         .search {
-            margin-left: auto; /* Помещаем поиск в конец строки */
-            margin-right: 20px; /* Добавляем немного отступа справа */
+            margin-left: auto;
+            background-color: #0801014d;
+            margin-right: 20px;
         }
     </style>
 </head>
-<body>
-    {% include 'top_menu.html' %}
-    <h1>Список сервисов</h1>
-    <div class="filters">
-        <select id="modalFilter">
-            <option value="">Все модальности</option>
-            {% for modal in modals %}
-                <option value="{{ modal.id }}">{{ modal.name }}</option>
-            {% endfor %}
-        </select>
-        <select id="targetFilter">
-            <option value="">Все целевые органы</option>
-            {% for target in targets %}
-                <option value="{{ target.id }}">{{ target.name }}</option>
-            {% endfor %}
-        </select>
-        <select id="pathologyFilter">
-            <option value="">Все патологии</option>
-            {% for pathology in pathologies %}
-                <option value="{{ pathology.id }}">{{ pathology.name }}</option>
-            {% endfor %}
-        </select>
-        <div class="search">
-            <input type="text" id="searchInput" placeholder="Поиск по названию">
+<body data-home-page="Главная-страница.html" data-home-page-title="Главная страница" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
+    <header class="u-clearfix u-header u-header" id="sec-204b">
+        <div class="u-clearfix u-sheet u-sheet-1">
+            <nav class="u-menu u-menu-dropdown u-offcanvas u-menu-1">
+                <div class="menu-collapse" style="font-size: 1rem; letter-spacing: 0px;">
+                    <a class="u-button-style u-custom-left-right-menu-spacing u-custom-padding-bottom u-custom-top-bottom-menu-spacing u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="#">
+                        <svg class="u-svg-link" viewBox="0 0 24 24">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#menu-hamburger"></use>
+                        </svg>
+                        <svg class="u-svg-content" version="1.1" id="menu-hamburger" viewBox="0 0 16 16" x="0px" y="0px" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <rect y="1" width="16" height="2"></rect>
+                                <rect y="7" width="16" height="2"></rect>
+                                <rect y="13" width="16" height="2"></rect>
+                            </g>
+                        </svg>
+                    </a>
+                </div>
+                <div class="u-nav-container">
+                    <ul class="u-nav u-unstyled u-nav-1">
+                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/" onclick="loadPage('/')">Главная</a></li>
+                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a></li>
+                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/logs" onclick="loadPage('/logs')">Журнал</a></li>
+                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/info" onclick="loadPage('/info')">О проекте</a></li>
+                    </ul>
+                </div>
+                <div class="u-nav-container-collapse">
+                    <div class="u-black u-container-style u-inner-container-layout u-opacity u-opacity-95 u-sidenav">
+                        <div class="u-inner-container-layout u-sidenav-overflow">
+                            <div class="u-menu-close"></div>
+                            <ul class="u-align-center u-nav u-popupmenu-items u-unstyled u-nav-2">
+                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/" onclick="loadPage('/')">Главная</a></li>
+                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a></li>
+                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/logs" onclick="loadPage('/logs')">Журнал</a></li>
+                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/info" onclick="loadPage('/info')">О проекте</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="u-black u-menu-overlay u-opacity u-opacity-70"></div>
+                </div>
+            </nav>
         </div>
-    </div>
-    <div class="service-cards">
-        {% for service in services %}
-            <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
-                <a href="/services/{{ service.id }}" class="question-link">
+    </header>
+
+    <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
+        <div class="u-clearfix u-sheet u-sheet-1">
+            <h1>Список сервисов</h1>
+            <div class="filters">
+                <select id="modalFilter">
+                    <option value="">Все модальности</option>
+                    {% for modal in modals %}
+                        <option value="{{ modal.id }}">{{ modal.name }}</option>
+                    {% endfor %}
+                </select>
+                <select id="targetFilter">
+                    <option value="">Все целевые органы</option>
+                    {% for target in targets %}
+                        <option value="{{ target.id }}">{{ target.name }}</option>
+                    {% endfor %}
+                </select>
+                <select id="pathologyFilter">
+                    <option value="">Все патологии</option>
+                    {% for pathology in pathologies %}
+                    <option value="{{ pathology.id }}">{{ pathology.name }}</option>
+                    {% endfor %}
+                    </select>
+                    <div class="search">
+                    <input type="text" id="searchInput" placeholder="Поиск по названию">
+                    </div>
+                    </div>
+                    <div class="service-cards">
+                    {% for service in services %}
+                    <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
+                    <a href="/services/{{ service.id }}" class="question-link">
                     <h2>{{ service.name }}</h2>
-                </a>
-                <p>Статус: {{ service.status }}</p>
-                <p>Модальность: {{ service.modal.name }}</p>
-                <p>Целевая часть: {{ service.target.name }}</p>
-                <p>Патология: {{ service.pathology.name }}</p>
-            </div>
-        {% endfor %}
-    </div>
-    <script>
-        const modalFilter = document.getElementById('modalFilter');
-        const targetFilter = document.getElementById('targetFilter');
-        const pathologyFilter = document.getElementById('pathologyFilter');
-        const searchInput = document.getElementById('searchInput');
-        const serviceCards = document.querySelectorAll('.service-card');
+                    </a>
+                    <p>Статус: {{ service.status }}</p>
+                    <p>Модальность: {{ service.modal.name }}</p>
+                    <p>Целевая часть: {{ service.target.name }}</p>
+                    <p>Патология: {{ service.pathology.name }}</p>
+                    </div>
+                    {% endfor %}
+                    </div>
+                    </div>
+                    </section>
 
-        // Добавляем обработчики событий на изменение фильтров и ввод в поле поиска
-        modalFilter.addEventListener('change', filterAndSearch);
-        targetFilter.addEventListener('change', filterAndSearch);
-        pathologyFilter.addEventListener('change', filterAndSearch);
-        searchInput.addEventListener('input', filterAndSearch);
 
-        // Функция для фильтрации и поиска карточек сервисов
-        function filterAndSearch() {
-            const selectedModal = modalFilter.value;
-            const selectedTarget = targetFilter.value;
-            const selectedPathology = pathologyFilter.value;
-            const searchText = searchInput.value.trim().toLowerCase();
+                    <footer class="u-clearfix u-footer u-grey-80" id="sec-9d95">
+                        <div class="u-clearfix u-sheet u-sheet-1">
+                            <a href="https://nicepage.com/k/youtube-website-templates" class="u-image u-logo u-image-1" data-image-width="585" data-image-height="600">
+                                <img src="static/images/585px-MIREA_Gerb_2021.png" class="u-logo-image u-logo-image-1">
+                            </a>
+                            <div class="u-border-1 u-border-white u-expanded-width u-line u-line-horizontal u-opacity u-opacity-50 u-line-1"></div>
+                            <p class="u-align-center u-text u-text-1"> https://www.mirea.ru/</p>
+                        </div>
+                    </footer>
 
-            serviceCards.forEach(card => {
-                const modal = card.getAttribute('data-modal');
-                const target = card.getAttribute('data-target');
-                const pathology = card.getAttribute('data-pathology');
-                const serviceName = card.querySelector('h2').textContent.toLowerCase();
+                    <script>
+                        const modalFilter = document.getElementById('modalFilter');
+                        const targetFilter = document.getElementById('targetFilter');
+                        const pathologyFilter = document.getElementById('pathologyFilter');
+                        const searchInput = document.getElementById('searchInput');
+                        const serviceCards = document.querySelectorAll('.service-card');
 
-                const modalMatch = !selectedModal || modal === selectedModal;
-                const targetMatch = !selectedTarget || target === selectedTarget;
-                const pathologyMatch = !selectedPathology || pathology === selectedPathology;
-                const searchMatch = serviceName.includes(searchText);
+                        modalFilter.addEventListener('change', filterAndSearch);
+                        targetFilter.addEventListener('change', filterAndSearch);
+                        pathologyFilter.addEventListener('change', filterAndSearch);
+                        searchInput.addEventListener('input', filterAndSearch);
 
-                if (modalMatch && targetMatch && pathologyMatch && searchMatch) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-    </script>
-</body>
-</html>
+                        function filterAndSearch() {
+                            const selectedModal = modalFilter.value;
+                            const selectedTarget = targetFilter.value;
+                            const selectedPathology = pathologyFilter.value;
+                            const searchText = searchInput.value.trim().toLowerCase();
+
+                            serviceCards.forEach(card => {
+                                const modal = card.getAttribute('data-modal');
+                                const target = card.getAttribute('data-target');
+                                const pathology = card.getAttribute('data-pathology');
+                                const serviceName = card.querySelector('h2').textContent.toLowerCase();
+
+                                const modalMatch = !selectedModal || modal === selectedModal;
+                                const targetMatch = !selectedTarget || target === selectedTarget;
+                                const pathologyMatch = !selectedPathology || pathology === selectedPathology;
+                                const searchMatch = serviceName.includes(searchText);
+
+                                if (modalMatch && targetMatch && pathologyMatch && searchMatch) {
+                                    card.style.display = 'block';
+                                } else {
+                                    card.style.display = 'none';
+                                }
+                            });
+                        }
+                    </script>
+                    </body> </html>
