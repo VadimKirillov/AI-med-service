@@ -119,9 +119,10 @@
                     {% for journal in journal_list %}
                     <div class="service-card" data-modal="{{ journal.service.modal.id }}" data-target="{{ journal.service.target.id }}" data-pathology="{{ journal.service.pathology.id }}">
                     <a href="/{{journal.service.url}}/{{ journal.id }}" class="question-link">
-                    <h2>{{ journal.service.name }}</h2>
+                    <h2>{{ journal.id }}</h2>
                     </a>
-                        <p>Статус: {{ journal.service.status }}</p>
+                        <img src="{{ journal.input_image_url }}" alt="исследование">
+                        <p>Сервис: {{ journal.service.name }}</p>
                         <p>Модальность: {{ journal.service.modal.name }}</p>
                         <p>Целевая часть: {{ journal.service.target.name }}</p>
                         <p>Патология: {{ journal.service.pathology.name }}</p>
