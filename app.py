@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
-from flask_mail import Mail, Message
+#from flask_mail import Mail, Message
 from sqlalchemy import desc, select, and_
 from nn_models.scratch import CovidClassifier
 from nn_models.classifier import classify_image

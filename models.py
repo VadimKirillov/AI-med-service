@@ -74,3 +74,12 @@ class Journal(db.Model):
 
     user = db.relationship('User', backref='journal')
     service = db.relationship('Service', backref='journal')
+
+
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    journal_id = db.Column(db.Integer, db.ForeignKey('journal.id'), nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    is_correct = db.Column(db.Boolean, nullable=False, default=False)
+    is_in_dataset = db.Column(db.Boolean, nullable=False, default=False)
+    user = db.relationship('Journal', backref='feedback')

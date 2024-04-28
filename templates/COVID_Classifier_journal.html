@@ -4,10 +4,10 @@
     <title>COVID-19 Detector</title>
     {% include 'top_menu_links.html'%}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="icon" type="image/png" href="static/images/logo.png">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/png" href="/static/images/logo.png">
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script src="static/error_script.js"></script>
+    <script src="/static/error_script.js"></script>
 
 </head>
 <body>
@@ -32,9 +32,7 @@
         <p>End time: {{ journal.end_time }}</p>
         <h4>Result: {{ journal.service_result }}</h4>
         <h4>Probability: {{ journal.percent_patology }}% </h4>
-        <img src="{{ journal.input_image_url }}" alt="исследование">
-        <h4>{{ journal.input_image_url }} </h4>
-
+        <img src="/{{ journal.input_image_url }}" alt="исследование">
         <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="start_time" value="{{ journal.start_time }}">
             <input type="hidden" name="end_time" value="{{ journal.end_time }}">

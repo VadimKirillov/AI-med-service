@@ -11,8 +11,8 @@ def create_tables_if_not_exist():
             not inspector.has_table('target') or \
             not inspector.has_table('pathology') or \
             not inspector.has_table('journal') or \
+            not inspector.has_table('feedback') or \
             not inspector.has_table('service'):
         db.create_all()
         db.session.commit()
         print("Таблицы созданы.")
-
