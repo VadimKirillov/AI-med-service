@@ -258,6 +258,8 @@ def covid_detector():
 
 @app.route("/covid_detector/<int:journal_id>", methods=['GET', 'POST'])
 def COVID_Classifier(journal_id):
+    journal = Journal.query.filter_by(id=journal_id).first()
+
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'feedback':
@@ -265,7 +267,7 @@ def COVID_Classifier(journal_id):
             return redirect(url_for('Feedback', journal_id=journal_id))
         return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
 
-    return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
+    return render_template("COVID_Classifier_journal.html", journal=journal)
 
 
 @app.route("/feedback", methods=['GET', 'POST'])

@@ -1,13 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>COVID-19 Detector</title>
+    {% include 'top_menu_links.html'%}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="icon" type="image/png" href="static/images/logo.png">
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="static/error_script.js"></script>
+
 </head>
 <body>
-    <p>journal_id == {{journal_id}}</p>
-     <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
-            <button type="submit" class="btn btn-info" id="feedback_button" name="action" value="feedback">Обратная связь</button>
-     </form>
+
+{% include 'top_menu.html' %}
+    <div class="container mt-4">
+        <h1 class="mb-4">COVID-19 Detector</h1>
+        <form id="upload_form" method="POST" enctype="multipart/form-data">
+            <div id="drop_zone" class="mb-3">
+                <label for="file_input">Drag and drop a file here or click to choose</label>
+                <input type="file" name="file" id="file_input" style="display: none;">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" name="action" value="detect">Detect</button>
+        </form>
+
+        {% if error %}
+        <script>
+            showError('{{error}}');
+        </script>
+        {% elif journal %}
+        <p>Start time: {{ journal.start_time }}</p>
+        <p>End time: {{ journal.end_time }}</p>
+        <h4>Result: {{ journal.service_result }}</h4>
+        <h4>Probability: {{ journal.percent_patology }}% </h4>
+        <img src="{{ journal.input_image_url }}" alt="исследование">
+        <h4>{{ journal.input_image_url }} </h4>
+
+        <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="start_time" value="{{ journal.start_time }}">
+            <input type="hidden" name="end_time" value="{{ journal.end_time }}">
+            <input type="hidden" name="predicted_label" value="{{ journal.service_result }}">
+            <input type="hidden" name="predicted_prob" value="{{ journal.percent_patology }}">
+            <input type="hidden" name="image_path" value="{{ journal.input_image_url }}">
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success mr-2" id="save_button" name="action" value="save">Сохранить</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+
+    <script>
+        const dropZone = document.getElementById('drop_zone');
+        const fileInput = document.getElementById('file_input');
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.style.backgroundColor = '#f0f0f0';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '';
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.style.backgroundColor = '';
+            const file = event.dataTransfer.files[0];
+            fileInput.files = event.dataTransfer.files;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const uploadedImage = document.createElement('img');
+                uploadedImage.src = e.target.result;
+                uploadedImage.classList.add('img-fluid', 'mt-3');
+                dropZone.appendChild(uploadedImage);
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+
+
 </body>
 </html>
