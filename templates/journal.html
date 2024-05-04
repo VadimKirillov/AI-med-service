@@ -27,6 +27,13 @@
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 5px;
+
+        }
+        .card-image {
+        width: 150px; /* Устанавливаем ширину изображения */
+        height: 150px; /* Устанавливаем высоту изображения */
+        object-fit: cover; /* Масштабирование изображения для заполнения */
+        border-radius: 5px; /* Добавляем закругленные углы */
         }
 
         .filters {
@@ -39,7 +46,11 @@
             font-size: 16px;
             color: #333;
         }
-
+        .service-card-wrapper {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 10px;
+           }
         .search {
             margin-left: auto;
             background-color: #0801014d;
@@ -114,24 +125,25 @@
                     {% endfor %}
                     </select>
 
-                    </div>
+            </div>
+
                     <div class="service-cards">
-                    {% for journal in journal_list %}
-                    <div class="service-card" data-modal="{{ journal.service.modal.id }}" data-target="{{ journal.service.target.id }}" data-pathology="{{ journal.service.pathology.id }}">
-                    <a href="/{{journal.service.url}}/{{ journal.id }}" class="question-link">
-                    <h2>{{ journal.id }}</h2>
-                    </a>
-                        <img src="{{ journal.input_image_url }}" alt="исследование">
-                        <p>Сервис: {{ journal.service.name }}</p>
-                        <p>Модальность: {{ journal.service.modal.name }}</p>
-                        <p>Целевая часть: {{ journal.service.target.name }}</p>
-                        <p>Патология: {{ journal.service.pathology.name }}</p>
-                    </div>
-                    {% endfor %}
-                    </div>
+                        <div class="service-card-wrapper">
+                            {% for journal in journal_list %}
+                            <a href="/{{ journal.service.url }}/{{ journal.id }}" class="service-card-link">
+                                <div class="service-card" data-modal="{{ journal.service.modal.id }}" data-target="{{ journal.service.target.id }}" data-pathology="{{ journal.service.pathology.id }}">
+                                    <img src="{{ journal.input_image_url }}" alt="исследование" class="card-image">
+                                    <p>Сервис: {{ journal.service.name }}</p>
+                                    <p>Модальность: {{ journal.service.modal.name }}</p>
+                                    <p>Целевая часть: {{ journal.service.target.name }}</p>
+                                    <p>Патология: {{ journal.service.pathology.name }}</p>
+                                </div>
+                                {% endfor %}
+                        </div>
+
                     </div>
                     </section>
-
+                    </a>
 
                     <footer class="u-clearfix u-footer u-grey-80" id="sec-9d95">
                         <div class="u-clearfix u-sheet u-sheet-1">
@@ -142,7 +154,7 @@
                             <p class="u-align-center u-text u-text-1"> https://www.mirea.ru/</p>
                         </div>
                     </footer>
-
+    </div>
                     <script>
                         const modalFilter = document.getElementById('modalFilter');
                         const targetFilter = document.getElementById('targetFilter');
@@ -177,4 +189,5 @@
                             });
                         }
                     </script>
+
                     </body> </html>

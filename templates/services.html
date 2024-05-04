@@ -28,7 +28,12 @@
             margin-bottom: 10px;
             border-radius: 5px;
         }
-
+        .card-image {
+        width: 250px; /* Устанавливаем ширину изображения */
+        height: 250px; /* Устанавливаем высоту изображения */
+        object-fit: cover; /* Масштабирование изображения для заполнения */
+        border-radius: 5px; /* Добавляем закругленные углы */
+        }
         .filters {
             display: flex;
             align-items: center;
@@ -38,7 +43,11 @@
             font-size: 16px;
             color: #333;
         }
-
+        .service-card-wrapper {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 10px;
+           }
         .search {
             margin-left: auto;
             background-color: #0801014d;
@@ -91,19 +100,24 @@
                     </div>
                     </div>
                     <div class="service-cards">
+                        <div class="service-card-wrapper">
                     {% for service in services %}
                         <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
                         <a href="/services/{{ service.id }}" class="question-link">
                         <h2>{{ service.name }}</h2>
-                        </a>
-                        <img src="{{ service.image_url }}" alt="{{ service.name }} logo">
+
+                        <img src="{{ service.image_url }}" alt="{{ service.name }} logo" class="card-image">
+                         </a>
                         <p>Статус: {{ service.status }}</p>
                         <p>Модальность: {{ service.modal.name }}</p>
                         <p>Целевая часть: {{ service.target.name }}</p>
                         <p>Патология: {{ service.pathology.name }}</p>
-                        </div>
+
+                         </div>
+
                     {% endfor %}
                     </div>
+                </div>
                     </div>
                     </section>
 

@@ -265,6 +265,12 @@ def COVID_Classifier(journal_id):
         if action == 'feedback':
             print("feedback")
             return redirect(url_for('Feedback', journal_id=journal_id))
+        if action == 'delete':
+            db.session.delete(journal)
+            db.session.commit()
+            return redirect(url_for('journal'))
+        if action == 'back':
+            return redirect(url_for('journal'))
         return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
 
     return render_template("COVID_Classifier_journal.html", journal=journal)
