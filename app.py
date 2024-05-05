@@ -92,9 +92,28 @@ with app.app_context():
                                          description='Определение опухоли в мозге',
                                          pathology_id=3, target_id=2, modal_id=1)
 
+        pneumonia_classifier = Service(name='Pneumonia-Detector', url='pneumonia_detector',
+                                         image_url='/static/images/pneumonia_logo.jpg',
+                                         description='Определение пневмонии в лёгких',
+                                         pathology_id=2, target_id=1, modal_id=3)
+
+        pneumothorax_classifier = Service(name='Pneumothorax-Detector', url='pneumothorax_detector',
+                                       image_url='/static/images/pneumothorax_logo.png',
+                                       description='Определение пневмоторакса в лёгких',
+                                       pathology_id=5, target_id=1, modal_id=3)
+
+        melanoma_classifier = Service(name='Melanoma-Detector', url='melanoma_detector',
+                                          image_url='/static/images/melanoma_logo.png',
+                                          description='Определение типа меланомы на коже',
+                                          pathology_id=4, target_id=5, modal_id=5)
+
+
         db.session.add(covid_detector)
         db.session.add(covid_segmentator)
         db.session.add(brain_tumor_classifier)
+        db.session.add(pneumonia_classifier)
+        db.session.add(pneumothorax_classifier)
+        db.session.add(melanoma_classifier)
 
     db.session.commit()
     print("Тестовые данные добавлены в таблицы")
