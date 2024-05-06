@@ -298,8 +298,15 @@ def COVID_Classifier(journal_id):
 @app.route("/feedback", methods=['GET', 'POST'])
 def Feedback():
     journal_id = request.args.get('journal_id')
-    print("journal_id", journal_id)
-    return render_template("feedback.html", journal_id=journal_id)
+    journal_feedback = Journal.query.filter_by(id=journal_id).first()
+    #print("journal_id", journal_id)
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'send':
+            return redirect(url_for('journal'))
+        if action == 'back':
+            return redirect(url_for('journal'))
+    return render_template("feedback.html", journal=journal_feedback)
 
 
 @app.route("/brain_tumor_detector", methods=['GET', 'POST'])
