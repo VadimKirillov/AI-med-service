@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
-#from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
 from sqlalchemy import desc, select, and_
 from nn_models.scratch import CovidClassifier
 from nn_models.classifier import classify_image
@@ -9,6 +9,7 @@ from access import group_permission_decorator
 from database import *
 from forms import *
 from models import *
+import uuid
 import json
 import os
 import random
@@ -93,20 +94,19 @@ with app.app_context():
                                          pathology_id=3, target_id=2, modal_id=1)
 
         pneumonia_classifier = Service(name='Pneumonia-Detector', url='pneumonia_detector',
-                                         image_url='/static/images/pneumonia_logo.jpg',
-                                         description='Определение пневмонии в лёгких',
-                                         pathology_id=2, target_id=1, modal_id=3)
+                                       image_url='/static/images/pneumonia_logo.jpg',
+                                       description='Определение пневмонии в лёгких',
+                                       pathology_id=2, target_id=1, modal_id=3)
 
         pneumothorax_classifier = Service(name='Pneumothorax-Detector', url='pneumothorax_detector',
-                                       image_url='/static/images/pneumothorax_logo.png',
-                                       description='Определение пневмоторакса в лёгких',
-                                       pathology_id=5, target_id=1, modal_id=3)
+                                          image_url='/static/images/pneumothorax_logo.png',
+                                          description='Определение пневмоторакса в лёгких',
+                                          pathology_id=5, target_id=1, modal_id=3)
 
         melanoma_classifier = Service(name='Melanoma-Detector', url='melanoma_detector',
-                                          image_url='/static/images/melanoma_logo.png',
-                                          description='Определение типа меланомы на коже',
-                                          pathology_id=4, target_id=5, modal_id=5)
-
+                                      image_url='/static/images/melanoma_logo.png',
+                                      description='Определение типа меланомы на коже',
+                                      pathology_id=4, target_id=5, modal_id=5)
 
         db.session.add(covid_detector)
         db.session.add(covid_segmentator)
@@ -283,7 +283,7 @@ def COVID_Classifier(journal_id):
         action = request.form.get('action')
         if action == 'feedback':
             print("feedback")
-            return redirect(url_for('Feedback', journal_id=journal_id))
+            return redirect(url_for('feedback', journal_id=journal_id))
         if action == 'delete':
             db.session.delete(journal)
             db.session.commit()
@@ -296,13 +296,25 @@ def COVID_Classifier(journal_id):
 
 
 @app.route("/feedback", methods=['GET', 'POST'])
-def Feedback():
+def feedback():
     journal_id = request.args.get('journal_id')
     journal_feedback = Journal.query.filter_by(id=journal_id).first()
-    #print("journal_id", journal_id)
+    # print("journal_id", journal_id)
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'send':
+            comment = request.form.get('comment')
+            is_correct = request.form.get('agree_result') == 'on'
+            is_in_dataset = request.form.get('research_included') == 'on'
+            print("comment", comment)
+            print("is_correct", is_correct)
+            print("is_in_dataset", is_in_dataset)
+            # Создание нового объекта Feedback
+            feedback_db = Feedback(journal_id=journal_id, comment=comment, is_correct=is_correct,
+                                   is_in_dataset=is_in_dataset)
+            # Добавление объекта в базу данных
+            db.session.add(feedback_db)
+            db.session.commit()
             return redirect(url_for('journal'))
         if action == 'back':
             return redirect(url_for('journal'))
@@ -467,6 +479,34 @@ def journal():
 @app.route("/info")
 def info():
     return render_template("info.html")
+
+
+@app.route('/dicom_analysis', methods=['GET', 'POST'])
+def dicom_analysis():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'detect':
+            file = request.files['file']
+
+            if file.filename == '':
+                return render_template("dicom_analysis.html", error="No selected file")
+
+            if file.filename.lower().endswith('.dcm'):
+                ds = pydicom.dcmread(file, force=True)
+                print(ds)
+                print(ds.Modality)
+                new_image = ds.pixel_array.astype(float)
+                scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
+                scaled_image = np.uint8(scaled_image)
+                final_image = Image.fromarray(scaled_image)
+                unique_filename = str(uuid.uuid4()) + ".png"
+                path = "static/images/" + unique_filename
+                final_image.save(path)
+                return render_template("dicom_analysis.html", modality=ds.Modality, path=path)
+            else:
+                return render_template("dicom_analysis.html", error="Not allowed type")
+
+    return render_template('dicom_analysis.html')
 
 
 def dcm_to_jpg(path):

@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>О проекте</title>
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <title>Вход</title>
-
+    {% include 'top_menu_links.html'%}
 </head>
-<body data-home-page="info.html" data-home-page-title="Информация" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru"style="height: 100vh; overflow: hidden;">
-<section class="u-clearfix u-palette-1-dark-3 u-section-2" id="sec-c5ed"  style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-
-{% include 'menu_top_main.html'%}
- <h1>Тут будет информация о проекте</h1>
-</section>
-
+{% include 'top_menu.html'%}
+<!--<body data-home-page="info.html" data-home-page-title="Информация" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru"style="height: 100vh; overflow: hidden;">-->
+<!--<section class="u-clearfix u-palette-1-dark-3 u-section-2" id="sec-c5ed"  style="display: flex; justify-content: center; align-items: center; height: 100vh;">-->
+    <a href="/dicom_analysis" >Перейти к анализу Dicom</a>
+<!--    {% include 'menu_top_main.html'%}-->
+<!--</section>-->
 </body>
 </html>
