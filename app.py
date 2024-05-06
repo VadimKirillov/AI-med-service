@@ -519,7 +519,8 @@ def dcm_to_jpg(path):
         scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
         scaled_image = np.uint8(scaled_image)
         final_image = Image.fromarray(scaled_image)
-        path = "static/images/test_image.png"  # TODO сделать нормальный путь для записи dicom файлов
+        unique_filename = str(uuid.uuid4()) + ".png"
+        path = "static/images/" + unique_filename
         final_image.save(path)
         return path
     else:
