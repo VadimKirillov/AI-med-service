@@ -14,7 +14,7 @@
 
 {% include 'top_menu.html' %}
     <div class="container mt-4 text-center">
-    <h1 class="mb-4">COVID-19 Detector</h1>
+    <h1 class="mb-4">{{ journal.service.name }}</h1>
     {% if error %}
     <script>
         showError('{{error}}');

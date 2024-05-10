@@ -122,7 +122,7 @@
                     <div class="service-cards">
                         <div class="service-card-wrapper">
                             {% for journal in journal_list %}
-                            <a href="/{{ journal.service.url }}/{{ journal.id }}" class="service-card-link">
+                            <a href="/journal/{{ journal.id }}" class="service-card-link">
                                 <div class="service-card" data-modal="{{ journal.service.modal.id }}" data-target="{{ journal.service.target.id }}" data-pathology="{{ journal.service.pathology.id }}">
                                     <img src="{{ journal.input_image_url }}" alt="исследование" class="card-image">
                                     <p>Сервис: {{ journal.service.name }}</p>

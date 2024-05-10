@@ -15,11 +15,11 @@ function showError(errorMessage) {
       case 'Incorrect shape':
         return "Некорректный размер изображения";
       case 'Modality_error':
-        return "Модальность в DICOM не соответствует модальности в сообщении Kafka и не поддерживается сервисом";
+        return "Модальность в DICOM не соответствует целевой модальности сервиса";
       case 'Series_error':
         return "Нет подходящих для обработки серий в исследовании";
       case 'Body_part_error':
-        return "Часть тела в DICOM-файле не соответствует части тела в сообщении Kafka и не поддерживается сервисом";
+        return "На изображении не распознан целевой орган";
       case 'Images_error':
         return "Сервис не смог определить, что изображено в DICOM-файле";
       case 'Other':

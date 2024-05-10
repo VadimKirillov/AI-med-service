@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 # from flask_mail import Mail, Message
 from sqlalchemy import desc, select, and_
+
+from nn_models.lung_autoencoder import ConvAutoencoder
+from nn_models.lung_outliers_classifier import check_lungs
 from nn_models.scratch import CovidClassifier
 from nn_models.classifier import classify_image
 from werkzeug.utils import secure_filename
@@ -204,24 +207,41 @@ def covid_detector():
                 return render_template("covid_detector.html", error="Not allowed type")
 
             if file.filename.lower().endswith('.dcm'):
-                file_path = dcm_to_jpg(file)
+                ds = pydicom.dcmread(file, force=True)
+                print(ds.Modality)
+
+                # Convert DICOM to PIL Image
+                if ds.Modality == "CT":
+                    file_path = dcm_to_jpg(ds)
+                else:
+                    return render_template("covid_detector.html", error="Modality_error")
             else:
                 filename = secure_filename(file.filename)
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
             try:
+                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+                image_path = os.path.join('static/images', image_filename)
+                print("image_path", image_path)
+
+                image_size = (64, 64)
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                lung_outliners_model = ConvAutoencoder().to(device)
+                lung_outliners_model.load_state_dict(
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
+                print("status_outliers", status_outliers)
+                if status_outliers == 0:
+                    return render_template("covid_detector.html", error="Body_part_error")
+
                 model = CovidClassifier()
                 model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
-
                 start_time = datetime.now().isoformat()
                 predicted_label = classify_image(file_path, model)[0]
                 predicted_prob = classify_image(file_path, model)[1]
 
                 print(predicted_label)
 
-                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
-                image_path = os.path.join('static/images', image_filename)
-                print("image_path", image_path)
                 end_time = datetime.now().isoformat()
 
                 username = session.get('username')
@@ -244,11 +264,12 @@ def covid_detector():
                                        image_path=image_path,
                                        start_time=start_time, end_time=end_time)
             except RuntimeError as e:
+                print("RuntimeError", e)
                 return render_template("covid_detector.html", error="Incorrect shape")
         elif action == 'save':
             # user = User.query.filter_by(username='username').first()
             print("session[id] ", session['id'])
-            service = Service.query.filter_by(name='COVID-Classifier').first()
+            service = Service.query.filter_by(url='covid_detector').first()
             start_time = request.form.get('start_time')
             end_time = request.form.get('end_time')
             predicted_label = request.form.get('predicted_label')
@@ -270,14 +291,13 @@ def covid_detector():
             # Добавить запись в сессию и сохранить в базе данных
             db.session.add(new_journal_entry)
             db.session.commit()
-            return redirect(url_for('COVID_Classifier', journal_id=new_journal_entry.id))
-
+            return redirect(url_for('journal_log', journal_id=new_journal_entry.id))
     return render_template("covid_detector.html")
 
 
-@app.route("/covid_detector/<int:journal_id>", methods=['GET', 'POST'])
-def COVID_Classifier(journal_id):
-    journal = Journal.query.filter_by(id=journal_id).first()
+@app.route("/journal/<int:journal_id>", methods=['GET', 'POST'])
+def journal_log(journal_id):
+    journal_db = Journal.query.filter_by(id=journal_id).first()
 
     if request.method == 'POST':
         action = request.form.get('action')
@@ -285,14 +305,12 @@ def COVID_Classifier(journal_id):
             print("feedback")
             return redirect(url_for('feedback', journal_id=journal_id))
         if action == 'delete':
-            db.session.delete(journal)
+            db.session.delete(journal_db)
             db.session.commit()
             return redirect(url_for('journal'))
         if action == 'back':
             return redirect(url_for('journal'))
-        return render_template("COVID_Classifier_journal.html", journal_id=journal_id)
-
-    return render_template("COVID_Classifier_journal.html", journal=journal)
+    return render_template("journal_log.html", journal=journal_db)
 
 
 @app.route("/feedback", methods=['GET', 'POST'])
@@ -434,6 +452,321 @@ def covid_segmentator():
     return render_template("covid_segmentator.html")
 
 
+@app.route("/pneumonia_detector", methods=['GET', 'POST'])
+def pneumonia_detector():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'detect':
+            file = request.files['file']
+
+            if 'username' not in session:
+                return redirect(url_for('login'))
+
+            if file.filename == '':
+                return render_template("pneumonia_detector.html", error="No selected file")
+
+            if not allowed_file(file.filename):
+                return render_template("pneumonia_detector.html", error="Not allowed type")
+
+            if file.filename.lower().endswith('.dcm'):
+                ds = pydicom.dcmread(file, force=True)
+                print(ds.Modality)
+
+                # Convert DICOM to PIL Image
+                if ds.Modality == "CT":
+                    file_path = dcm_to_jpg(ds)
+                else:
+                    return render_template("pneumonia_detector.html", error="Modality_error")
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+            try:
+                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+                image_path = os.path.join('static/images', image_filename)
+                print("image_path", image_path)
+
+                image_size = (64, 64)
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                lung_outliners_model = ConvAutoencoder().to(device)
+                lung_outliners_model.load_state_dict(
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
+                print("status_outliers", status_outliers)
+                if status_outliers == 0:
+                    return render_template("pneumonia_detector.html", error="Body_part_error")
+
+                model = CovidClassifier()
+                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                start_time = datetime.now().isoformat()
+                predicted_label = classify_image(file_path, model)[0]
+                predicted_prob = classify_image(file_path, model)[1]
+
+                print(predicted_label)
+
+                end_time = datetime.now().isoformat()
+
+                username = session.get('username')
+                user = User.query.filter_by(username=username).first()
+
+                print("user.id", user.id)
+                new_detection_log = DetectionLogs(service_id=1,
+                                                  status='обработано',
+                                                  name_patology=predicted_label,
+                                                  percent_patology=predicted_prob,
+                                                  start_time=start_time,
+                                                  end_time=end_time,
+                                                  user_id=user.id)
+
+                db.session.add(new_detection_log)
+                db.session.commit()
+
+                return render_template("pneumonia_detector.html", predicted_label=predicted_label,
+                                       predicted_prob=predicted_prob,
+                                       image_path=image_path,
+                                       start_time=start_time, end_time=end_time)
+            except RuntimeError as e:
+                print("RuntimeError", e)
+                return render_template("pneumonia_detector.html", error="Incorrect shape")
+        elif action == 'save':
+            # user = User.query.filter_by(username='username').first()
+            print("session[id] ", session['id'])
+            service = Service.query.filter_by(url='pneumonia_detector').first()
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            predicted_label = request.form.get('predicted_label')
+            predicted_prob = request.form.get('predicted_prob')
+            image_path = request.form.get('image_path')
+            image_path = image_path.replace('\\', '/')
+            # Создать новую запись в таблице Journal
+            new_journal_entry = Journal(
+                service_id=service.id,
+                user_id=session['id'],
+                service_result=predicted_label,
+                percent_patology=predicted_prob,
+                start_time=start_time,
+                end_time=end_time,
+                input_image_url=image_path
+                # output_image_url='output_image_url_value'
+            )
+
+            # Добавить запись в сессию и сохранить в базе данных
+            db.session.add(new_journal_entry)
+            db.session.commit()
+            return redirect(url_for('journal_log', journal_id=new_journal_entry.id))
+    return render_template("pneumonia_detector.html")
+
+
+@app.route("/pneumothorax_detector", methods=['GET', 'POST'])
+def pneumothorax_detector():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'detect':
+            file = request.files['file']
+
+            if 'username' not in session:
+                return redirect(url_for('login'))
+
+            if file.filename == '':
+                return render_template("pneumothorax_detector.html", error="No selected file")
+
+            if not allowed_file(file.filename):
+                return render_template("pneumothorax_detector.html", error="Not allowed type")
+
+            if file.filename.lower().endswith('.dcm'):
+                ds = pydicom.dcmread(file, force=True)
+                print(ds.Modality)
+
+                # Convert DICOM to PIL Image
+                if ds.Modality == "CT":
+                    file_path = dcm_to_jpg(ds)
+                else:
+                    return render_template("pneumothorax_detector.html", error="Modality_error")
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+            try:
+                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+                image_path = os.path.join('static/images', image_filename)
+                print("image_path", image_path)
+
+                image_size = (64, 64)
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                lung_outliners_model = ConvAutoencoder().to(device)
+                lung_outliners_model.load_state_dict(
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
+                print("status_outliers", status_outliers)
+                if status_outliers == 0:
+                    return render_template("pneumothorax_detector.html", error="Body_part_error")
+
+                model = CovidClassifier()
+                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                start_time = datetime.now().isoformat()
+                predicted_label = classify_image(file_path, model)[0]
+                predicted_prob = classify_image(file_path, model)[1]
+
+                print(predicted_label)
+
+                end_time = datetime.now().isoformat()
+
+                username = session.get('username')
+                user = User.query.filter_by(username=username).first()
+
+                print("user.id", user.id)
+                new_detection_log = DetectionLogs(service_id=1,
+                                                  status='обработано',
+                                                  name_patology=predicted_label,
+                                                  percent_patology=predicted_prob,
+                                                  start_time=start_time,
+                                                  end_time=end_time,
+                                                  user_id=user.id)
+
+                db.session.add(new_detection_log)
+                db.session.commit()
+
+                return render_template("pneumothorax_detector.html", predicted_label=predicted_label,
+                                       predicted_prob=predicted_prob,
+                                       image_path=image_path,
+                                       start_time=start_time, end_time=end_time)
+            except RuntimeError as e:
+                print("RuntimeError", e)
+                return render_template("pneumothorax_detector.html", error="Incorrect shape")
+        elif action == 'save':
+            # user = User.query.filter_by(username='username').first()
+            print("session[id] ", session['id'])
+            service = Service.query.filter_by(url='pneumothorax_detector').first()
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            predicted_label = request.form.get('predicted_label')
+            predicted_prob = request.form.get('predicted_prob')
+            image_path = request.form.get('image_path')
+            image_path = image_path.replace('\\', '/')
+            # Создать новую запись в таблице Journal
+            new_journal_entry = Journal(
+                service_id=service.id,
+                user_id=session['id'],
+                service_result=predicted_label,
+                percent_patology=predicted_prob,
+                start_time=start_time,
+                end_time=end_time,
+                input_image_url=image_path
+                # output_image_url='output_image_url_value'
+            )
+
+            # Добавить запись в сессию и сохранить в базе данных
+            db.session.add(new_journal_entry)
+            db.session.commit()
+            return redirect(url_for('journal_log', journal_id=new_journal_entry.id))
+    return render_template("pneumothorax_detector.html")
+
+
+@app.route("/melanoma_detector", methods=['GET', 'POST'])
+def melanoma_detector():
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'detect':
+            file = request.files['file']
+
+            if 'username' not in session:
+                return redirect(url_for('login'))
+
+            if file.filename == '':
+                return render_template("melanoma_detector.html", error="No selected file")
+
+            if not allowed_file(file.filename):
+                return render_template("melanoma_detector.html", error="Not allowed type")
+
+            if file.filename.lower().endswith('.dcm'):
+                ds = pydicom.dcmread(file, force=True)
+                print(ds.Modality)
+
+                # Convert DICOM to PIL Image
+                if ds.Modality == "CT":
+                    file_path = dcm_to_jpg(ds)
+                else:
+                    return render_template("melanoma_detector.html", error="Modality_error")
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+            try:
+                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+                image_path = os.path.join('static/images', image_filename)
+                print("image_path", image_path)
+
+                image_size = (64, 64)
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                lung_outliners_model = ConvAutoencoder().to(device)
+                lung_outliners_model.load_state_dict(
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
+                print("status_outliers", status_outliers)
+                if status_outliers == 0:
+                    return render_template("melanoma_detector.html", error="Body_part_error")
+
+                model = CovidClassifier()
+                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                start_time = datetime.now().isoformat()
+                predicted_label = classify_image(file_path, model)[0]
+                predicted_prob = classify_image(file_path, model)[1]
+
+                print(predicted_label)
+
+                end_time = datetime.now().isoformat()
+
+                username = session.get('username')
+                user = User.query.filter_by(username=username).first()
+
+                print("user.id", user.id)
+                new_detection_log = DetectionLogs(service_id=1,
+                                                  status='обработано',
+                                                  name_patology=predicted_label,
+                                                  percent_patology=predicted_prob,
+                                                  start_time=start_time,
+                                                  end_time=end_time,
+                                                  user_id=user.id)
+
+                db.session.add(new_detection_log)
+                db.session.commit()
+
+                return render_template("melanoma_detector.html", predicted_label=predicted_label,
+                                       predicted_prob=predicted_prob,
+                                       image_path=image_path,
+                                       start_time=start_time, end_time=end_time)
+            except RuntimeError as e:
+                print("RuntimeError", e)
+                return render_template("melanoma_detector.html", error="Incorrect shape")
+        elif action == 'save':
+            # user = User.query.filter_by(username='username').first()
+            print("session[id] ", session['id'])
+            service = Service.query.filter_by(url='melanoma_detector').first()
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            predicted_label = request.form.get('predicted_label')
+            predicted_prob = request.form.get('predicted_prob')
+            image_path = request.form.get('image_path')
+            image_path = image_path.replace('\\', '/')
+            # Создать новую запись в таблице Journal
+            new_journal_entry = Journal(
+                service_id=service.id,
+                user_id=session['id'],
+                service_result=predicted_label,
+                percent_patology=predicted_prob,
+                start_time=start_time,
+                end_time=end_time,
+                input_image_url=image_path
+                # output_image_url='output_image_url_value'
+            )
+
+            # Добавить запись в сессию и сохранить в базе данных
+            db.session.add(new_journal_entry)
+            db.session.commit()
+            return redirect(url_for('journal_log', journal_id=new_journal_entry.id))
+    return render_template("melanoma_detector.html")
+
+
 @app.route("/services")
 def services():
     # detection_logs = DetectionLogs.query.all()
@@ -448,6 +781,8 @@ def services():
 @app.route("/services/<int:service_id>", methods=["GET", "POST"])
 def display_services(service_id):
     if request.method == 'POST':
+        if 'username' not in session:
+            return redirect(url_for('login'))
         service = Service.query.get(service_id)
         return redirect(url_for(service.url))
     else:
@@ -458,7 +793,6 @@ def display_services(service_id):
 @app.route("/logs")
 def logs():
     detection_logs = DetectionLogs.query.all()
-
     return render_template("logs.html", detection_logs=detection_logs)
 
 
@@ -493,8 +827,8 @@ def dicom_analysis():
 
             if file.filename.lower().endswith('.dcm'):
                 ds = pydicom.dcmread(file, force=True)
-                #print(ds)
-                
+                # print(ds)
+
                 body_part = ds.get((0x0018, 0x0015))
                 body_part = str(body_part.value).strip()
 
@@ -516,22 +850,16 @@ def dicom_analysis():
     return render_template('dicom_analysis.html')
 
 
-def dcm_to_jpg(path):
-    ds = pydicom.dcmread(path, force=True)
-    print(ds.Modality)
-
+def dcm_to_jpg(ds):
     # Convert DICOM to PIL Image
-    if ds.Modality == "CT":
-        new_image = ds.pixel_array.astype(float)
-        scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
-        scaled_image = np.uint8(scaled_image)
-        final_image = Image.fromarray(scaled_image)
-        unique_filename = str(uuid.uuid4()) + ".png"
-        path = "static/images/" + unique_filename
-        final_image.save(path)
-        return path
-    else:
-        return "error modality"
+    new_image = ds.pixel_array.astype(float)
+    scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
+    scaled_image = np.uint8(scaled_image)
+    final_image = Image.fromarray(scaled_image)
+    unique_filename = str(uuid.uuid4()) + ".png"
+    path = "static/images/" + unique_filename
+    final_image.save(path)
+    return path
 
 
 if __name__ == "__main__":
