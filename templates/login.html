@@ -1,54 +1,39 @@
 <!DOCTYPE html>
-<html style="font-size: 16px;" lang="ru">
+<html style="font-size: 18px;" lang="ru">
+
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Отображение на телефонах -->
     <meta charset="utf-8">
     <title>Вход</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
     <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
+
+    <!--динамические элементы -->
     <script class="u-script" type="text/javascript" src="static/jquery.js" defer=""></script>
     <script class="u-script" type="text/javascript" src="static/nicepage.js" defer=""></script>
+
     <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
     <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
     <meta name="theme-color" content="#411ae7">
     {% include 'top_menu_links.html'%}
 
 </head>
+{% include 'top_menu.html'%}
 
-<body data-home-page="Главная-страница.html" data-home-page-title="Главная страница" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru"style="height: 100vh; overflow: hidden;">
-    <header class="u-clearfix u-header u-header" id="sec-204b" >
-        <div class="u-clearfix u-sheet u-sheet-1">
-            <nav class="u-menu u-menu-dropdown u-offcanvas u-menu-1">
-
-                <div class="u-nav-container">
-                    <ul class="u-nav u-unstyled u-nav-1">
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/" onclick="loadPage('/')">Главная</a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/journal" onclick="loadPage('/journal')">Журнал</a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/info" onclick="loadPage('/info')">О проекте</a></li>
-                    </ul>
-                </div>
-
-            </nav>
-        </div>
-    </header>
-
+<body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
     <script>
-        function loadPage(url) {
-            // Добавляем анимацию при нажатии на кнопку
-            const targetTab = document.querySelector("[href='" + url + "']");
-            targetTab.classList.add("animate__animated", "animate__pulse");
-
-            // После завершения анимации удаляем класс анимации
-            targetTab.addEventListener("animationend", function() {
-                targetTab.classList.remove("animate__animated", "animate__pulse");
-            });
-
-            // Здесь ваша логика загрузки страницы
-        }
-
-
-    </script>
+    function loadPage(url) {
+      // Добавляем анимацию при нажатии на кнопку
+      const targetTab = document.querySelector("[href='" + url + "']");
+      targetTab.classList.add("animate__animated", "animate__pulse");
+      // После завершения анимации удаляем класс анимации
+      targetTab.addEventListener("animationend", function() {
+        targetTab.classList.remove("animate__animated", "animate__pulse");
+      });
+      // Здесь ваша логика загрузки страницы
+    }
+  </script>
 <script>
         function toggleTabs() {
     const groupName = "{{ session.get('group_name') }}";

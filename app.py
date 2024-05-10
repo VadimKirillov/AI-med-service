@@ -493,8 +493,14 @@ def dicom_analysis():
 
             if file.filename.lower().endswith('.dcm'):
                 ds = pydicom.dcmread(file, force=True)
-                print(ds)
-                print(ds.Modality)
+                #print(ds)
+                
+                body_part = ds.get((0x0018, 0x0015))
+                body_part = str(body_part.value).strip()
+
+                patient_identity_removed = ds.get((0x0012, 0x0062))
+                patient_identity_removed = str(patient_identity_removed.value).strip()
+
                 new_image = ds.pixel_array.astype(float)
                 scaled_image = (np.maximum(new_image, 0) / new_image.max()) * 255.0
                 scaled_image = np.uint8(scaled_image)
@@ -502,7 +508,8 @@ def dicom_analysis():
                 unique_filename = str(uuid.uuid4()) + ".png"
                 path = "static/images/" + unique_filename
                 final_image.save(path)
-                return render_template("dicom_analysis.html", modality=ds.Modality, path=path)
+                return render_template("dicom_analysis.html", modality=ds.Modality, body_part=body_part,
+                                       patient_identity_removed=patient_identity_removed, path=path)
             else:
                 return render_template("dicom_analysis.html", error="Not allowed type")
 

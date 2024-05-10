@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html style="font-size: 16px;" lang="ru">
+<html style="font-size: 18px;" lang="ru">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="">
-    <meta name="description" content="">
-    <title>Журнал</title>
+
+    <title>Журнал исследований</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
     <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
-    <script class="u-script" type="text/javascript" src="static/jquery.js" defer=""></script>
-    <script class="u-script" type="text/javascript" src="static/nicepage.js" defer=""></script>
+
+
     <meta name="generator" content="Nicepage 6.7.6, nicepage.com">
+
     <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
     <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+
     <script type="application/ld+json">{
         "@context": "http://schema.org",
         "@type": "Organization",
@@ -22,29 +24,42 @@
     <meta name="theme-color" content="#411ae7">
     <style>
         .service-card {
-            display: block;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        text-align: center;
         }
         .card-image {
-        width: 150px; /* Устанавливаем ширину изображения */
-        height: 150px; /* Устанавливаем высоту изображения */
+        width: 250px; /* Устанавливаем ширину изображения */
+        height: 250px; /* Устанавливаем высоту изображения */
         object-fit: cover; /* Масштабирование изображения для заполнения */
-        border-radius: 5px; /* Добавляем закругленные углы */
+        border-radius: 10px; /* Добавляем закругленные углы */
+        margin-bottom: 15px;
         }
-
+        .service-card h2 {
+            font-size: 36px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .service-card p {
+            font-size: 20px;
+            color:white;
+            margin-bottom: 1px;
+        }
         .filters {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
-            background-color: #0000004d;
             border: 1px solid #ddd;
             padding: 5px;
             font-size: 16px;
             color: #333;
+            border-radius: 5px;
         }
         .service-card-wrapper {
         display: grid;
@@ -52,73 +67,50 @@
         grid-gap: 10px;
            }
         .search {
-            margin-left: auto;
-            background-color: #0801014d;
-            margin-right: 20px;
+            width: auto!important;
+            height: auto!important;
+            font-size: 18px!important;
+            padding: 5px;
+            border-radius: 5px;
+            margin-right: 10px;
+            margin-left: 260px;
+            border: 1px solid #ddd;
+            text-align: center;
+            color:black!important;
         }
-    </style>
-</head>
-<body data-home-page="Главная-страница.html" data-home-page-title="Главная страница" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
-    <header class="u-clearfix u-header u-header" id="sec-204b">
-        <div class="u-clearfix u-sheet u-sheet-1">
-            <nav class="u-menu u-menu-dropdown u-offcanvas u-menu-1">
-                <div class="menu-collapse" style="font-size: 1rem; letter-spacing: 0px;">
-                    <a class="u-button-style u-custom-left-right-menu-spacing u-custom-padding-bottom u-custom-top-bottom-menu-spacing u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="#">
-                        <svg class="u-svg-link" viewBox="0 0 24 24">
-                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#menu-hamburger"></use>
-                        </svg>
-                        <svg class="u-svg-content" version="1.1" id="menu-hamburger" viewBox="0 0 16 16" x="0px" y="0px" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
-                            <g>
-                                <rect y="1" width="16" height="2"></rect>
-                                <rect y="7" width="16" height="2"></rect>
-                                <rect y="13" width="16" height="2"></rect>
-                            </g>
-                        </svg>
-                    </a>
-                </div>
-                <div class="u-nav-container">
-                    <ul class="u-nav u-unstyled u-nav-1">
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/" onclick="loadPage('/')">Главная</a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/journal" onclick="loadPage('/journal')">Журнал</a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/info" onclick="loadPage('/info')">О проекте</a></li>
-                    </ul>
-                </div>
-                <div class="u-nav-container-collapse">
-                    <div class="u-black u-container-style u-inner-container-layout u-opacity u-opacity-95 u-sidenav">
-                        <div class="u-inner-container-layout u-sidenav-overflow">
-                            <div class="u-menu-close"></div>
-                            <ul class="u-align-center u-nav u-popupmenu-items u-unstyled u-nav-2">
-                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/" onclick="loadPage('/')">Главная</a></li>
-                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a></li>
-                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/journal" onclick="loadPage('/journal')">Журнал</a></li>
-                                <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/info" onclick="loadPage('/info')">О проекте</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="u-black u-menu-overlay u-opacity u-opacity-70"></div>
-                </div>
-            </nav>
-        </div>
-    </header>
+        .custom-select {
+        width: auto!important;
+        height: auto!important;
+        padding: 5px;
+        border-radius: 5px;
+        margin-right: 10px;
+        margin-left: 4px;
+        border: 1px solid #ddd;
+        }
 
+    </style>
+    {% include 'top_menu_links.html'%}
+</head>
+{% include 'top_menu.html'%}
+
+<body  class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
     <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
         <div class="u-clearfix u-sheet u-sheet-1">
-            <h1>Журнал</h1>
+            <h2>Журнал исследований</h2>
             <div class="filters">
-                <select id="modalFilter">
+                <select class="custom-select" id="modalFilter">
                     <option value="">Все модальности</option>
                     {% for modal in modals %}
                         <option value="{{ modal.id }}">{{ modal.name }}</option>
                     {% endfor %}
                 </select>
-                <select id="targetFilter">
+                <select class="custom-select" id="targetFilter">
                     <option value="">Все целевые органы</option>
                     {% for target in targets %}
                         <option value="{{ target.id }}">{{ target.name }}</option>
                     {% endfor %}
                 </select>
-                <select id="pathologyFilter">
+                <select class="custom-select" id="pathologyFilter">
                     <option value="">Все патологии</option>
                     {% for pathology in pathologies %}
                     <option value="{{ pathology.id }}">{{ pathology.name }}</option>

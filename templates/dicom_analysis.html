@@ -28,6 +28,10 @@
                     showError('{{error}}');
                 </script>
             {% else %}
+                <h2>Модальность: {{ modality }}</h2>
+                <h2>Часть тела: {{ body_part }}</h2>
+                <h2>Исследование обезличенно: {{ patient_identity_removed }}</h2>
+
                 <img src="{{ path }}" class="img-fluid mt-3">
 <!--                <input type="hidden" id="action_input" name="action">-->
              <form id="action_form_buttons" method="POST" enctype="multipart/form-data">

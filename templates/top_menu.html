@@ -1,68 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .top-menu .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar-text {
-            margin-right: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='главная-страница.css') }}" media="screen">
+
+  <style>
+    .top-menu .navbar {
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #2b2933 !important;
+      color: #ffffff !important;
+    }
+
+    .navbar-text {
+      margin-right: 10px;
+      background-color: #2b2933 !important;
+      color: #ffffff !important;
+      margin-left: 30px;
+    }
+    .top-menu .navbar .nav-link {
+    color: #ffffff !important;
+}
+  </style>
 </head>
+
 <body>
-     <div class="top-menu">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-<!--            <a class="navbar-brand" href="/">Главная страница</a>-->
+  <div class="top-menu">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/" onclick="loadPage('/')">Главная страница <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/journal" onclick="loadPage('/journal')">Журнал</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/info" onclick="loadPage('/info')">О проекте</a>
+        </li>
 
-            <ul class="navbar-nav mr-auto">
-                 <li class="nav-item active">
-                    <a class="nav-link" href="/" onclick="loadPage('/')">Главная страница <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/journal" onclick="loadPage('/journal')">Журнал</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/info" onclick="loadPage('/info')">О проекте</a>
-                </li>
+      </ul>
+      <div>
+        <span id="usernameDisplay" class="navbar-text"></span>
+      </div>
+      <div>
+        <a id="loginButton" href="{{ url_for('login') }}" class="btn btn-outline-primary">Войти</a>
+        <a id="logoutButton" href="{{ url_for('login') }}" class="btn btn-outline-primary" style="display: none;">Выйти</a>
+      </div>
 
-            </ul>
-            <div>
-                <span id="usernameDisplay" class="navbar-text"></span>
-            </div>
-            <div>
-                <a id="loginButton" href="{{ url_for('login') }}" class="btn btn-outline-primary">Войти</a>
-                <a id="logoutButton" href="{{ url_for('login') }}" class="btn btn-outline-primary" style="display: none;">Выйти</a>
-            </div>
+    </nav>
+  </div>
 
-        </nav>
-</div>
-
-    <script>
-        function loadPage(url) {
-            // Добавляем анимацию при нажатии на кнопку
-            const targetTab = document.querySelector("[href='" + url + "']");
-            targetTab.classList.add("animate__animated", "animate__pulse");
-
-            // После завершения анимации удаляем класс анимации
-            targetTab.addEventListener("animationend", function() {
-                targetTab.classList.remove("animate__animated", "animate__pulse");
-            });
-
-            // Здесь ваша логика загрузки страницы
-        }
-
-
+  <script>
+    function loadPage(url) {
+      // Добавляем анимацию при нажатии на кнопку
+      const targetTab = document.querySelector("[href='" + url + "']");
+      targetTab.classList.add("animate__animated", "animate__pulse");
+      // После завершения анимации удаляем класс анимации
+      targetTab.addEventListener("animationend", function() {
+        targetTab.classList.remove("animate__animated", "animate__pulse");
+      });
+      // Здесь ваша логика загрузки страницы
+    }
     </script>
 <script>
         function toggleTabs() {

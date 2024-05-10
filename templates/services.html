@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html style="font-size: 16px;" lang="ru">
+<html style="font-size: 18px;" lang="ru">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="">
-    <meta name="description" content="">
+
     <title>Сервисы</title>
+
+    <!--основные стили -->
     <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
     <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
-    <script class="u-script" type="text/javascript" src="static/jquery.js" defer=""></script>
-    <script class="u-script" type="text/javascript" src="static/nicepage.js" defer=""></script>
-    <meta name="generator" content="Nicepage 6.7.6, nicepage.com">
+
+    <!--шрифты -->
     <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
     <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+
     <script type="application/ld+json">{
         "@context": "http://schema.org",
         "@type": "Organization",
@@ -20,19 +21,36 @@
         "logo": "static/images/585px-MIREA_Gerb_2021.png"
     }</script>
     <meta name="theme-color" content="#411ae7">
+
+
     <style>
         .service-card {
-            display: block;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ddd;
+        padding: 5;
+        margin-bottom: 5;
+        border-radius: 5px;
+        text-align: center;
         }
         .card-image {
         width: 250px; /* Устанавливаем ширину изображения */
         height: 250px; /* Устанавливаем высоту изображения */
         object-fit: cover; /* Масштабирование изображения для заполнения */
-        border-radius: 5px; /* Добавляем закругленные углы */
+        border-radius: 10px; /* Добавляем закругленные углы */
+        margin-bottom: 3px;
+        }
+        .service-card h2 {
+            font-size: 36px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .service-card p {
+            font-size: 20px;
+            color:white;
+            margin-bottom: 1px;
         }
         .filters {
             display: flex;
@@ -42,6 +60,7 @@
             padding: 5px;
             font-size: 16px;
             color: #333;
+            border-radius: 5px;
         }
         .service-card-wrapper {
         display: grid;
@@ -49,77 +68,83 @@
         grid-gap: 10px;
            }
         .search {
-            margin-left: auto;
-            background-color: #0801014d;
-            margin-right: 20px;
+            width: auto!important;
+            height: auto!important;
+            font-size: 18px!important;
+            padding: 5px;
+            border-radius: 5px;
+            margin-right: 10px;
+            margin-left: 260px;
+            border: 1px solid #ddd;
+            text-align: center;
+            color:black!important;
         }
+        .custom-select {
+        width: auto!important;
+        height: auto!important;
+        padding: 5px;
+        border-radius: 5px;
+        margin-right: 10px;
+        margin-left: 4px;
+        border: 1px solid #ddd;
+        }
+
+
     </style>
+    {% include 'top_menu_links.html'%}
 </head>
-<body data-home-page="Главная-страница.html" data-home-page-title="Главная страница" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
-    <header class="u-clearfix u-header u-header" id="sec-204b">
-        <div class="u-clearfix u-sheet u-sheet-1">
-            <nav class="u-menu u-menu-dropdown u-offcanvas u-menu-1">
+{% include 'top_menu.html'%}
 
-                <div class="u-nav-container">
-                    <ul class="u-nav u-unstyled u-nav-1">
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/" onclick="loadPage('/')">Главная</a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/services" onclick="loadPage('/services')">Сервисы <span class="sr-only">(current)</span></a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/journal" onclick="loadPage('/journal')">Журнал</a></li>
-                        <li class="u-nav-item"><a class="u-button-style u-nav-link" href="/info" onclick="loadPage('/info')">О проекте</a></li>
-                    </ul>
-                </div>
 
-            </nav>
-        </div>
-    </header>
-
+<body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
     <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
         <div class="u-clearfix u-sheet u-sheet-1">
-            <h2>Список сервисов</h2>
-            <div class="filters">
-                <select id="modalFilter">
-                    <option value="">Все модальности</option>
-                    {% for modal in modals %}
-                        <option value="{{ modal.id }}">{{ modal.name }}</option>
-                    {% endfor %}
-                </select>
-                <select id="targetFilter">
-                    <option value="">Все целевые органы</option>
-                    {% for target in targets %}
-                        <option value="{{ target.id }}">{{ target.name }}</option>
-                    {% endfor %}
-                </select>
-                <select id="pathologyFilter">
-                    <option value="">Все патологии</option>
-                    {% for pathology in pathologies %}
-                    <option value="{{ pathology.id }}">{{ pathology.name }}</option>
-                    {% endfor %}
-                    </select>
-                    <div class="search">
-                        <input type="text" id="searchInput" placeholder="Поиск по названию">
-                    </div>
-                    </div>
-                    <div class="service-cards">
-                        <div class="service-card-wrapper">
-                    {% for service in services %}
-                        <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
-                        <a href="/services/{{ service.id }}" class="question-link">
-                        <h2>{{ service.name }}</h2>
+          <h2>Список сервисов</h2>
+          <div class="filters">
+            <select class="custom-select" id="modalFilter">
+              <option value="">Все модальности</option>
+              {% for modal in modals %}
+              <option value="{{ modal.id }}">{{ modal.name }}</option>
+              {% endfor %}
+            </select>
+            <select class="custom-select" id="targetFilter">
+              <option value="">Все целевые органы</option>
+              {% for target in targets %}
+              <option value="{{ target.id }}">{{ target.name }}</option>
+              {% endfor %}
+            </select>
+            <select class="custom-select" id="pathologyFilter">
+              <option value="">Все патологии</option>
+              {% for pathology in pathologies %}
+              <option value="{{ pathology.id }}">{{ pathology.name }}</option>
+              {% endfor %}
+            </select>
+            <div>
+              <input class="search" type="text" id="searchInput" placeholder="Поиск по названию">
+            </div>
+          </div>
 
-                        <img src="{{ service.image_url }}" alt="{{ service.name }} logo" class="card-image">
-                         </a>
-                        <p>Статус: {{ service.status }}</p>
-                        <p>Модальность: {{ service.modal.name }}</p>
-                        <p>Целевая часть: {{ service.target.name }}</p>
-                        <p>Патология: {{ service.pathology.name }}</p>
+          <div class="service-cards">
+            <div class="service-card-wrapper">
+              {% for service in services %}
+              <div class="service-card" data-modal="{{ service.modal.id }}" data-target="{{ service.target.id }}" data-pathology="{{ service.pathology.id }}">
+                <a href="/services/{{ service.id }}" class="question-link">
+                  <h2>{{ service.name }}</h2>
 
-                         </div>
+                  <img src="{{ service.image_url }}" alt="{{ service.name }} logo" class="card-image">
+                </a>
+                <p>Модальность: {{ service.modal.name }}</p>
+                <p>Анатомическая область: {{ service.target.name }}</p>
+                <p>Целевая патология: {{ service.pathology.name }}</p>
 
-                    {% endfor %}
-                    </div>
-                </div>
-                    </div>
-                    </section>
+              </div>
+
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+
 
 
                     <footer class="u-clearfix u-footer u-grey-80" id="sec-9d95">

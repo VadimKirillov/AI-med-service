@@ -1,18 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html style="font-size: 18px;" lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>О проекте</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
+
     <title>Вход</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
+
+    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+    <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+
+
     {% include 'top_menu_links.html'%}
 </head>
 {% include 'top_menu.html'%}
 <!--<body data-home-page="info.html" data-home-page-title="Информация" data-path-to-root="./" data-include-products="false" class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru"style="height: 100vh; overflow: hidden;">-->
 <!--<section class="u-clearfix u-palette-1-dark-3 u-section-2" id="sec-c5ed"  style="display: flex; justify-content: center; align-items: center; height: 100vh;">-->
     <a href="/dicom_analysis" >Перейти к анализу Dicom</a>
-<!--    {% include 'menu_top_main.html'%}-->
 <!--</section>-->
-</body>
+<body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
+
+<body>
 </html>
