@@ -1,17 +1,19 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 # from flask_mail import Mail, Message
 from sqlalchemy import desc, select, and_
+from torch import nn
 
 from nn_models.lung_autoencoder import ConvAutoencoder
 from nn_models.lung_outliers_classifier import check_lungs
 from nn_models.scratch import CovidClassifier
-from nn_models.classifier import classify_image
+from nn_models.classifier import classify_image, bin_classify_image
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from access import group_permission_decorator
 from database import *
 from forms import *
 from models import *
+import torchvision.models as models
 import uuid
 import json
 import os
@@ -228,7 +230,7 @@ def covid_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
@@ -490,17 +492,26 @@ def pneumonia_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
                     return render_template("pneumonia_detector.html", error="Body_part_error")
 
-                model = CovidClassifier()
-                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                class_labels_pneumonia = ['Pneumonia', 'Normal']
+                resnet_model = models.resnet18(weights='DEFAULT')
+                num_ftrs = resnet_model.fc.in_features
+                resnet_model.fc = nn.Linear(num_ftrs, 2)  # Заменяем на выход из 2 классов (ваш случай)
+                resnet_weights = "static/pneumonia_classifier_resnet_weights.pth"
+                resnet_model.load_state_dict(torch.load(resnet_weights, map_location=torch.device(device)))
+
+                # model = CovidClassifier()
+                # model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                #
+
                 start_time = datetime.now().isoformat()
-                predicted_label = classify_image(file_path, model)[0]
-                predicted_prob = classify_image(file_path, model)[1]
+                predicted_label = bin_classify_image(file_path, resnet_model, class_labels_pneumonia)[0]
+                predicted_prob = bin_classify_image(file_path, resnet_model, class_labels_pneumonia)[1]
 
                 print(predicted_label)
 
@@ -595,17 +606,22 @@ def pneumothorax_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
                     return render_template("pneumothorax_detector.html", error="Body_part_error")
 
-                model = CovidClassifier()
-                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                class_labels_pneumothorax = ['Pneumothorax', 'Normal']
+                resnet_model = models.resnet18(weights='DEFAULT')
+                num_ftrs = resnet_model.fc.in_features
+                resnet_model.fc = nn.Linear(num_ftrs, 2)  # Заменяем на выход из 2 классов (ваш случай)
+                resnet_weights = "static/pneumothorax_classifier_resnet_weights.pth"
+                resnet_model.load_state_dict(torch.load(resnet_weights, map_location=torch.device(device)))
+
                 start_time = datetime.now().isoformat()
-                predicted_label = classify_image(file_path, model)[0]
-                predicted_prob = classify_image(file_path, model)[1]
+                predicted_label = bin_classify_image(file_path, resnet_model, class_labels_pneumothorax)[0]
+                predicted_prob = bin_classify_image(file_path, resnet_model, class_labels_pneumothorax)[1]
 
                 print(predicted_label)
 
@@ -700,7 +716,7 @@ def melanoma_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
