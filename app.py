@@ -1,17 +1,21 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 # from flask_mail import Mail, Message
 from sqlalchemy import desc, select, and_
-
+from torch import nn
+from PIL import Image, ImageDraw
+import segmentation_models_pytorch as smp
 from nn_models.lung_autoencoder import ConvAutoencoder
 from nn_models.lung_outliers_classifier import check_lungs
 from nn_models.scratch import CovidClassifier
-from nn_models.classifier import classify_image
+from nn_models.classifier import classify_image, bin_classify_image
+from nn_models.lung_segmentator import predict_mask, remove_small_regions
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from access import group_permission_decorator
 from database import *
 from forms import *
 from models import *
+import torchvision.models as models
 import uuid
 import json
 import os
@@ -228,7 +232,7 @@ def covid_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
@@ -404,51 +408,161 @@ def brain_tumor_detector():
 @app.route("/covid_segmentator", methods=['GET', 'POST'])
 def covid_segmentator():
     if request.method == 'POST':
-        if 'file' not in request.files:
-            return render_template("covid_segmentator.html", error="No file part")
+        action = request.form.get('action')
+        if action == 'detect':
+            file = request.files['file']
 
-        file = request.files['file']
+            if 'username' not in session:
+                return redirect(url_for('login'))
 
-        if file.filename == '':
-            return render_template("covid_segmentator.html", error="No selected file")
+            if file.filename == '':
+                return render_template("covid_segmentator.html", error="No selected file")
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
+            if not allowed_file(file.filename):
+                return render_template("covid_segmentator.html", error="Not allowed type")
 
-            model = CovidClassifier()
-            model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+            if file.filename.lower().endswith('.dcm'):
+                ds = pydicom.dcmread(file, force=True)
+                print(ds.Modality)
 
-            start_time = datetime.now().isoformat()
-            predicted_label = classify_image(file_path, model)[0]
-            predicted_prob = classify_image(file_path, model)[1]
+                # Convert DICOM to PIL Image
+                if ds.Modality == "CT":
+                    file_path = dcm_to_jpg(ds)
+                else:
+                    return render_template("covid_segmentator.html", error="Modality_error")
+            else:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+            try:
+                image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
+                image_path = os.path.join('static/images', image_filename)
+                print("image_path", image_path)
 
-            print(predicted_label)
+                image_size = (64, 64)
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                lung_outliners_model = ConvAutoencoder().to(device)
+                lung_outliners_model.load_state_dict(
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
+                status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
+                print("status_outliers", status_outliers)
+                if status_outliers == 0:
+                    return render_template("covid_segmentator.html", error="Body_part_error")
 
-            image_filename = os.path.basename(file_path)  # Получаем имя файла из полного пути
-            image_path = os.path.join('static/images', image_filename)
-            end_time = datetime.now().isoformat()
+                image_size = (256, 256)
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-            username = session.get('username')
-            user = User.query.filter_by(username=username).first()
+                lung_model = smp.Unet(
+                    encoder_name="resnet34",
+                    encoder_weights="imagenet",
+                    in_channels=1,
+                    classes=1,
+                )
 
-            new_detection_log = DetectionLogs(service_id=2,
-                                              status='обработано',
-                                              name_patology=predicted_label,
-                                              percent_patology=predicted_prob,
-                                              start_time=start_time,
-                                              end_time=end_time,
-                                              user_id=user.id)
+                infection_model = smp.Unet(
+                    encoder_name='timm-resnest101e',
+                    encoder_weights='imagenet',
+                    in_channels=1,
+                    classes=1
+                )
 
-            db.session.add(new_detection_log)
+                lung_model.to(device)
+                infection_model.to(device)
+
+                lung_model.load_state_dict(
+                    torch.load('static/segmentation_model_lung_weights.pth', map_location=device))
+                infection_model.load_state_dict(
+                    torch.load('static/segmentation_model_infection_weights.pth', map_location=device))
+
+                start_time = datetime.now().isoformat()
+
+                predicted_lung_mask = predict_mask(image_path, lung_model, image_size, device)
+                predicted_infection_mask = predict_mask(image_path, infection_model, image_size, device)
+
+                predicted_lung_mask = remove_small_regions(predicted_lung_mask)
+                predicted_infection_mask = np.where(predicted_lung_mask == 1, predicted_infection_mask, 0)
+
+                num_lung_pixels = np.sum(predicted_lung_mask)
+                num_infection_pixels = np.sum(predicted_infection_mask)
+
+                if num_lung_pixels > 0:
+                    lung_infection_percentage = (num_infection_pixels / num_lung_pixels) * 100
+                else:
+                    lung_infection_percentage = 0
+
+                name_patology = 'COVID' if lung_infection_percentage > 1 else 'Normal'
+
+                image = Image.open(image_path).convert('RGBA')
+                image = image.resize((256, 256))
+
+                predicted_lung_mask = Image.fromarray(np.uint8(predicted_lung_mask * 255), mode='L')
+                predicted_infection_mask = Image.fromarray(np.uint8(predicted_infection_mask * 255), mode='L')
+
+                lung_overlay = Image.new('RGBA', image.size, (0, 128, 0, 32))  # Зеленый цвет
+                lung_overlay.putalpha(predicted_lung_mask)
+
+                infection_overlay = Image.new('RGBA', image.size, (128, 0, 0, 32))  # Красный цвет
+                infection_overlay.putalpha(predicted_infection_mask)
+
+                # Наложение масок на изображение
+                image = Image.alpha_composite(image, lung_overlay)
+                image = Image.alpha_composite(image, infection_overlay)
+
+                uid = str(uuid.uuid4()) + "segmentation.png"
+                output_path = os.path.join("static/images", f'{uid}.png')
+
+                image.save(output_path)
+
+                end_time = datetime.now().isoformat()
+
+                username = session.get('username')
+                user = User.query.filter_by(username=username).first()
+
+                print("user.id", user.id)
+                new_detection_log = DetectionLogs(service_id=1,
+                                                  status='обработано',
+                                                  name_patology=name_patology,
+                                                  percent_patology=f"{lung_infection_percentage:.2f}",
+                                                  start_time=start_time,
+                                                  end_time=end_time,
+                                                  user_id=user.id)
+
+                db.session.add(new_detection_log)
+                db.session.commit()
+
+                return render_template("covid_segmentator.html", predicted_label=name_patology,
+                                       predicted_prob=f"{lung_infection_percentage:.2f}",
+                                       image_path=output_path,
+                                       start_time=start_time, end_time=end_time)
+            except RuntimeError as e:
+                print("RuntimeError", e)
+                return render_template("covid_segmentator.html", error="Incorrect shape")
+        elif action == 'save':
+            # user = User.query.filter_by(username='username').first()
+            print("session[id] ", session['id'])
+            service = Service.query.filter_by(url='covid_segmentator').first()
+            start_time = request.form.get('start_time')
+            end_time = request.form.get('end_time')
+            predicted_label = request.form.get('predicted_label')
+            predicted_prob = request.form.get('predicted_prob')
+            image_path = request.form.get('image_path')
+            image_path = image_path.replace('\\', '/')
+            # Создать новую запись в таблице Journal
+            new_journal_entry = Journal(
+                service_id=service.id,
+                user_id=session['id'],
+                service_result=predicted_label,
+                percent_patology=predicted_prob,
+                start_time=start_time,
+                end_time=end_time,
+                input_image_url=image_path,
+                output_image_url=output_path
+            )
+
+            # Добавить запись в сессию и сохранить в базе данных
+            db.session.add(new_journal_entry)
             db.session.commit()
-
-            return render_template("covid_segmentator.html", predicted_label=predicted_label,
-                                   predicted_prob=predicted_prob,
-                                   image_path=image_path,
-                                   start_time=start_time, end_time=end_time)
-
+            return redirect(url_for('journal_log', journal_id=new_journal_entry.id))
     return render_template("covid_segmentator.html")
 
 
@@ -490,17 +604,26 @@ def pneumonia_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
                     return render_template("pneumonia_detector.html", error="Body_part_error")
 
-                model = CovidClassifier()
-                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                class_labels_pneumonia = ['Pneumonia', 'Normal']
+                resnet_model = models.resnet18(weights='DEFAULT')
+                num_ftrs = resnet_model.fc.in_features
+                resnet_model.fc = nn.Linear(num_ftrs, 2)  # Заменяем на выход из 2 классов (ваш случай)
+                resnet_weights = "static/pneumonia_classifier_resnet_weights.pth"
+                resnet_model.load_state_dict(torch.load(resnet_weights, map_location=torch.device(device)))
+
+                # model = CovidClassifier()
+                # model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                #
+
                 start_time = datetime.now().isoformat()
-                predicted_label = classify_image(file_path, model)[0]
-                predicted_prob = classify_image(file_path, model)[1]
+                predicted_label = bin_classify_image(file_path, resnet_model, class_labels_pneumonia)[0]
+                predicted_prob = bin_classify_image(file_path, resnet_model, class_labels_pneumonia)[1]
 
                 print(predicted_label)
 
@@ -595,17 +718,22 @@ def pneumothorax_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:
                     return render_template("pneumothorax_detector.html", error="Body_part_error")
 
-                model = CovidClassifier()
-                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                class_labels_pneumothorax = ['Pneumothorax', 'Normal']
+                resnet_model = models.resnet18(weights='DEFAULT')
+                num_ftrs = resnet_model.fc.in_features
+                resnet_model.fc = nn.Linear(num_ftrs, 2)  # Заменяем на выход из 2 классов (ваш случай)
+                resnet_weights = "static/pneumothorax_classifier_resnet_weights.pth"
+                resnet_model.load_state_dict(torch.load(resnet_weights, map_location=torch.device(device)))
+
                 start_time = datetime.now().isoformat()
-                predicted_label = classify_image(file_path, model)[0]
-                predicted_prob = classify_image(file_path, model)[1]
+                predicted_label = bin_classify_image(file_path, resnet_model, class_labels_pneumothorax)[0]
+                predicted_prob = bin_classify_image(file_path, resnet_model, class_labels_pneumothorax)[1]
 
                 print(predicted_label)
 
@@ -700,7 +828,7 @@ def melanoma_detector():
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 lung_outliners_model = ConvAutoencoder().to(device)
                 lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device('cpu')))
+                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
                 status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
                 print("status_outliers", status_outliers)
                 if status_outliers == 0:

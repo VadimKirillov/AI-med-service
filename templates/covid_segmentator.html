@@ -6,7 +6,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/style.css">
     <link rel="icon" type="image/png" href="static/images/logo.png">
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src="static/error_script.js"></script>
+
 </head>
+<body>
+
 {% include 'top_menu.html' %}
     <div class="container mt-4">
         <h1 class="mb-4">COVID-19 Segmentator</h1>
@@ -16,20 +21,36 @@
                 <label for="file_input">Drag and drop a file here or click to choose</label>
                 <input type="file" name="file" id="file_input" style="display: none;">
             </div>
-            <button type="submit" class="btn btn-primary btn-lg" id="detectButton">Detect</button>
+            <button type="submit" class="btn btn-primary btn-lg" name="action" value="detect">Detect</button>
         </form>
-        <div id="result" class="mt-4" style="display: none;">
-            <h4>Detected Image:</h4>
-            <img id="detectedImage" src="" class="img-fluid mt-3" alt="Detected Image">
+            {% if error %}
+                <script>
+                    showError('{{error}}');
+                </script>
+            {% elif predicted_label %}
+                <p>Start time: {{ start_time }}</p>
+                <p>End time: {{ end_time }}</p>
+                <h4>Result: {{ predicted_label }}</h4>
+                <h4>Probability: {{ predicted_prob }}% </h4>
+                <img src="{{ image_path }}" class="img-fluid mt-3" alt="Uploaded Image">
+<!--                <input type="hidden" id="action_input" name="action">-->
+             <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
+                   <input type="hidden" name="start_time" value="{{ start_time }}">
+                   <input type="hidden" name="end_time" value="{{ end_time }}">
+                   <input type="hidden" name="predicted_label" value="{{ predicted_label }}">
+                   <input type="hidden" name="predicted_prob" value="{{ predicted_prob }}">
+                   <input type="hidden" name="image_path" value="{{ image_path }}">
+                 <div class="mt-4">
+                    <button type="submit" class="btn btn-success mr-2" id="save_button" name="action" value="save">Сохранить</button>
+                </div>
+             </form>
+            {% endif %}
         </div>
-    </div>
+
 
     <script>
         const dropZone = document.getElementById('drop_zone');
         const fileInput = document.getElementById('file_input');
-        const detectButton = document.getElementById('detectButton');
-        const resultDiv = document.getElementById('result');
-        const detectedImage = document.getElementById('detectedImage');
 
         dropZone.addEventListener('dragover', (event) => {
             event.preventDefault();
@@ -55,13 +76,8 @@
             };
             reader.readAsDataURL(file);
         });
-
-        detectButton.addEventListener('click', () => {
-            // Показываем блок с результатом
-            resultDiv.style.display = 'block';
-            // Устанавливаем путь к изображению
-            detectedImage.src = 'static/images/segmentator.jpg';
-        });
     </script>
+
+
 </body>
 </html>
