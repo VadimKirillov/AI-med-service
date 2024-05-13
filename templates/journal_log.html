@@ -148,18 +148,14 @@
                 <div class="content-wrapper">
                     <div class="image-container">
                         <img src="/{{ journal.input_image_url }}" alt="исследование">
-                    {% if journal.output_image_url %}
-                        <img src="/{{ journal.output_image_url }}" alt="исследование">
-                    {% endif %}
                     </div>
-
 
                     <div class="info-wrapper">
                         <div class="info-container">
                             <h3>Результат обработки изображения</h3>
                             <div class="divider"></div>
-                            <h5>Результат: {{ journal.service_result }}</h5>
-                            <h5>Вероятность: {{ journal.percent_patology }}% </h5>
+                            <h5>Результат: {{ predicted_label }}</h5>
+                            <h5>Вероятность: {{ predicted_prob }}% </h5>
 
                             <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="start_time" value="{{ journal.start_time }}">
@@ -181,15 +177,6 @@
 
 
 
-                <footer class="u-clearfix u-footer u-palette-1-dark-3 u-section-1" id="sec-9d95">
-                    <div class="u-clearfix u-sheet u-sheet-1">
-<!--                        <a href="https://www.mirea.ru" class="u-image u-logo u-image-1" data-image-width="585" data-image-height="600">-->
-<!--                            <img src="/static/images/585px-MIREA_Gerb_2021.png" class="u-logo-image u-logo-image-1">-->
-<!--                        </a>-->
-<!--                        <div class="u-border-1 u-border-white u-expanded-width u-line u-line-horizontal u-opacity u-opacity-50 u-line-1"></div>-->
-<!--                        <p class="u-align-center u-text u-text-1"> https://www.mirea.ru/</p>-->
-                    </div>
-                </footer>
 
 
 </body>
