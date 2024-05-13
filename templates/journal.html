@@ -166,14 +166,13 @@
                                 const modal = card.getAttribute('data-modal');
                                 const target = card.getAttribute('data-target');
                                 const pathology = card.getAttribute('data-pathology');
-                                const serviceName = card.querySelector('h2').textContent.toLowerCase();
+
 
                                 const modalMatch = !selectedModal || modal === selectedModal;
                                 const targetMatch = !selectedTarget || target === selectedTarget;
                                 const pathologyMatch = !selectedPathology || pathology === selectedPathology;
-                                const searchMatch = serviceName.includes(searchText);
 
-                                if (modalMatch && targetMatch && pathologyMatch && searchMatch) {
+                                if (modalMatch && targetMatch && pathologyMatch) {
                                     card.style.display = 'block';
                                 } else {
                                     card.style.display = 'none';

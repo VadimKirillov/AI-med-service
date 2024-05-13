@@ -498,11 +498,15 @@ def covid_segmentator():
                 predicted_lung_mask = Image.fromarray(np.uint8(predicted_lung_mask * 255), mode='L')
                 predicted_infection_mask = Image.fromarray(np.uint8(predicted_infection_mask * 255), mode='L')
 
+                # Создание полупрозрачных масок
+                lung_alpha = predicted_lung_mask.point(lambda p: p * 0.3)
+                infection_alpha = predicted_infection_mask.point(lambda p: p * 0.3)
+
                 lung_overlay = Image.new('RGBA', image.size, (0, 128, 0, 32))  # Зеленый цвет
-                lung_overlay.putalpha(predicted_lung_mask)
+                lung_overlay.putalpha(lung_alpha)
 
                 infection_overlay = Image.new('RGBA', image.size, (128, 0, 0, 32))  # Красный цвет
-                infection_overlay.putalpha(predicted_infection_mask)
+                infection_overlay.putalpha(infection_alpha)
 
                 # Наложение масок на изображение
                 image = Image.alpha_composite(image, lung_overlay)
@@ -532,7 +536,7 @@ def covid_segmentator():
 
                 return render_template("covid_segmentator.html", predicted_label=name_patology,
                                        predicted_prob=f"{lung_infection_percentage:.2f}",
-                                       image_path=output_path,
+                                       image_path=output_path, input_path=image_path,
                                        start_time=start_time, end_time=end_time)
             except RuntimeError as e:
                 print("RuntimeError", e)
@@ -546,7 +550,11 @@ def covid_segmentator():
             predicted_label = request.form.get('predicted_label')
             predicted_prob = request.form.get('predicted_prob')
             image_path = request.form.get('image_path')
+            input_path = request.form.get('input_path')
+
             image_path = image_path.replace('\\', '/')
+            input_path = input_path.replace('\\', '/')
+
             # Создать новую запись в таблице Journal
             new_journal_entry = Journal(
                 service_id=service.id,
@@ -555,8 +563,8 @@ def covid_segmentator():
                 percent_patology=predicted_prob,
                 start_time=start_time,
                 end_time=end_time,
-                input_image_url=image_path,
-                output_image_url=output_path
+                input_image_url=input_path,
+                output_image_url=image_path
             )
 
             # Добавить запись в сессию и сохранить в базе данных
@@ -932,7 +940,8 @@ def journal():
     modals = Modal.query.all()
     targets = Target.query.all()
     pathologies = Pathology.query.all()
-    journal_list = Journal.query.filter_by(user_id=session['id']).all()
+    # journal_list = Journal.query.filter_by(user_id=session['id']).all()
+    journal_list = Journal.query.filter_by(user_id=session['id']).order_by(desc(Journal.end_time)).all()
     return render_template("journal.html", journal_list=journal_list,
                            modals=modals, targets=targets,
                            pathologies=pathologies)
