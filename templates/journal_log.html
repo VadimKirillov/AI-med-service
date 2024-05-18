@@ -1,10 +1,10 @@
 <html style="font-size: 18px;" lang="ru">
     <head>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href="static/style.css">
+        <link rel="stylesheet" href="/static/style.css">
         <link rel="icon" type="image/png" href="static/images/logo.png">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-        <script src="static/error_script.js"></script>
+        <script src="/static/error_script.js"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="utf-8">
@@ -131,18 +131,14 @@
         {% include 'top_menu_links.html'%}
     </head>
     {% include 'top_menu.html' %}
-
-
-
-
     {% if error %}
     <script>
         showError('{{error}}');
     </script>
     {% elif journal %}
-    <body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
-        <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
-            <div class="outer-container">
+<body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru" >
+      <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
+        <div class="outer-container">
                 <h2>{{ journal.service.name }}</h2>
 
                 <div class="content-wrapper">
@@ -154,8 +150,8 @@
                         <div class="info-container">
                             <h3>Результат обработки изображения</h3>
                             <div class="divider"></div>
-                            <h5>Результат: {{ predicted_label }}</h5>
-                            <h5>Вероятность: {{ predicted_prob }}% </h5>
+                            <h5>Результат: {{ journal.service_result }}</h5>
+                            <h5>Вероятность: {{ journal.percent_patology }}% </h5>
 
                             <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="start_time" value="{{ journal.start_time }}">
@@ -166,18 +162,12 @@
                                     <button type="submit" class="btn btn-success mr-2" id="save_button" name="action" value="feedback">Обратная связь</button>
                                     <button type="submit" class="btn btn-danger mr-2" id="delete_button" name="action" value="delete">Удалить</button>
                                     <button type="submit" class="btn btn-success mr-2" id="back_button" name="action" value="back">Назад</button>
-                      </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
-                    </div>
                     {% endif %}
-                </section>
-
-
-
-
-
-
-
+        </div>
+      </section>
 </body>
 </html>
