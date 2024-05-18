@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html style="font-size: 18px;" lang="ru">
     <head>
-        <title>пневмония</title>
+        <title>Пневмания детектор</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <link rel="stylesheet" href="static/style.css">
         <link rel="icon" type="image/png" href="static/images/logo.png">
@@ -124,10 +124,11 @@
                 margin-bottom: 20px; /* Расстояние между линией и текстом ниже */
                 margin-top: 20px;
                 }
+
+
                 body{
                     background-color: #2b2933!important;
                 }
-
 
         </style>
 
@@ -137,11 +138,11 @@
     {% include 'top_menu.html' %}
 
 
-    <body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
+    <body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru" >
       <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
         <div class="outer-container">
             <div class="mt-4">
-              <h2 class="mb-4">Определение пневмонии в лёгких</h2>
+              <h2 class="mb-4">Определение пневмонии</h2>
               <form id="upload_form" method="POST" enctype="multipart/form-data">
                   <div id="drop_zone" class="mb-3">
                       <label for="file_input">Перетащите сюда файл или кликните для выбора</label>
@@ -187,6 +188,9 @@
             </div>
                 </div>
                 {% endif %}
+            </div>
+
+
             </section>
 
 
@@ -233,34 +237,3 @@
             </script>
     </body>
 </html>
-
-
-
-<div class="mt-3">
-    <label for="agree_result">Согласны ли вы с результатом работы сервиса?</label>
-    <input type="checkbox" id="agree_result" name="agree_result">
-</div>
-
-<div class="mt-3">
-    <label for="research_included">Поданное исследование содержится в обучающем наборе данных?</label>
-    <input type="checkbox" id="research_included" name="research_included">
-</div>
-
-<div class="mt-3">
-    <label for="comment">Комментарий</label>
-    <input type="text" id="comment" name="comment" class="comment">
-</div>
-
-
-<div class="mt-4">
-    <button type="submit" class="btn btn-success mr-2" id="save_button" name="action" value="send">Отправить</button>
-    <button type="submit" class="btn btn-success mr-2" id="back_button" name="action" value="back">Назад</button>
-</div>
-</form>
-{% endif %}
-</div>
-
-
-
-
-

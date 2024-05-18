@@ -5,6 +5,8 @@
         <link rel="icon" type="image/png" href="static/images/logo.png">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
         <script src="/static/error_script.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="utf-8">
@@ -160,8 +162,11 @@
                                 <input type="hidden" name="predicted_prob" value="{{ journal.percent_patology }}">
                                 <input type="hidden" name="image_path" value="{{ journal.input_image_url }}">
                                     <button type="submit" class="btn btn-success mr-2" id="save_button" name="action" value="feedback">Обратная связь</button>
+                                    <button type="button" class="btn btn-success mr-2" id="pdf_button">Сохранить в PDF</button>
                                     <button type="submit" class="btn btn-danger mr-2" id="delete_button" name="action" value="delete">Удалить</button>
                                     <button type="submit" class="btn btn-success mr-2" id="back_button" name="action" value="back">Назад</button>
+
+
                             </form>
                         </div>
                     </div>
@@ -169,5 +174,42 @@
                     {% endif %}
         </div>
       </section>
+<script>
+  document.getElementById('pdf_button').addEventListener('click', function() {
+    // Получение данных из HTML
+    const serviceName = "{{ journal.service.name }}";
+    const imageUrl = "/{{ journal.input_image_url }}";
+    const result = "{{ journal.service_result }}";
+    const probability = "{{ journal.percent_patology }}%";
+
+    // Использование jsPDF для генерации PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ encoding: 'UTF-8' }); // Указываем кодировку UTF-8
+
+    // Добавление текста в PDF
+    doc.setFontSize(18);
+    doc.text(serviceName, 20, 20);
+    doc.setFontSize(14);
+
+    doc.text('Result: ' + result, 20, 50);
+    doc.text('Probability: ' + probability, 20, 60);
+
+    // Добавление изображения в PDF
+    const img = new Image();
+    img.src = imageUrl;
+    img.onload = function() {
+      // Изображение загружено, добавляем его в PDF
+      doc.addImage(img, 'JPEG', 20, 70, 160, 90);
+
+      // Сохранение PDF
+      doc.save('result.pdf');
+    };
+
+    img.onerror = function() {
+      console.error('Ошибка загрузки изображения');
+    };
+  });
+</script>
+
 </body>
 </html>
