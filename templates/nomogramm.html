@@ -96,47 +96,10 @@
 <body  class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru">
     <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
         <div class="u-clearfix u-sheet u-sheet-1">
-            <h2>Журнал исследований</h2>
-            <div class="filters">
-                <select class="custom-select" id="modalFilter">
-                    <option value="">Все модальности</option>
-                    {% for modal in modals %}
-                        <option value="{{ modal.id }}">{{ modal.name }}</option>
-                    {% endfor %}
-                </select>
-                <select class="custom-select" id="targetFilter">
-                    <option value="">Все целевые органы</option>
-                    {% for target in targets %}
-                        <option value="{{ target.id }}">{{ target.name }}</option>
-                    {% endfor %}
-                </select>
-                <select class="custom-select" id="pathologyFilter">
-                    <option value="">Все патологии</option>
-                    {% for pathology in pathologies %}
-                    <option value="{{ pathology.id }}">{{ pathology.name }}</option>
-                    {% endfor %}
-                    </select>
 
-            </div>
 
-                    <div class="service-cards">
-                        <div class="service-card-wrapper">
-                            {% for journal in journal_list %}
-                            <a href="/journal/{{ journal.id }}" class="service-card-link">
-                                <div class="service-card" data-modal="{{ journal.service.modal.id }}" data-target="{{ journal.service.target.id }}" data-pathology="{{ journal.service.pathology.id }}">
-                                    <p>Номер исследования : {{ '%08d' | format(journal.id) }}</p>
-                                    <img src="{{ journal.input_image_url }}" alt="исследование" class="card-image">
-                                    <p>Сервис: {{ journal.service.name }}</p>
-                                    <p>Модальность: {{ journal.service.modal.name }}</p>
-                                    <p>Целевая часть: {{ journal.service.target.name }}</p>
-                                    <p>Патология: {{ journal.service.pathology.name }}</p>
-                                </div>
-                                {% endfor %}
-                        </div>
-
-                    </div>
-                    </section>
-                    </a>
+        </div>
+    </section>
 
                     <footer class="u-clearfix u-footer u-grey-80" id="sec-9d95">
                         <div class="u-clearfix u-sheet u-sheet-1">
@@ -148,38 +111,6 @@
                         </div>
                     </footer>
     </div>
-                    <script>
-                        const modalFilter = document.getElementById('modalFilter');
-                        const targetFilter = document.getElementById('targetFilter');
-                        const pathologyFilter = document.getElementById('pathologyFilter');
-                        const serviceCards = document.querySelectorAll('.service-card');
 
-                        modalFilter.addEventListener('change', filterAndSearch);
-                        targetFilter.addEventListener('change', filterAndSearch);
-                        pathologyFilter.addEventListener('change', filterAndSearch);
-
-                        function filterAndSearch() {
-                            const selectedModal = modalFilter.value;
-                            const selectedTarget = targetFilter.value;
-                            const selectedPathology = pathologyFilter.value;
-
-                            serviceCards.forEach(card => {
-                                const modal = card.getAttribute('data-modal');
-                                const target = card.getAttribute('data-target');
-                                const pathology = card.getAttribute('data-pathology');
-
-
-                                const modalMatch = !selectedModal || modal === selectedModal;
-                                const targetMatch = !selectedTarget || target === selectedTarget;
-                                const pathologyMatch = !selectedPathology || pathology === selectedPathology;
-
-                                if (modalMatch && targetMatch && pathologyMatch) {
-                                    card.style.display = 'block';
-                                } else {
-                                    card.style.display = 'none';
-                                }
-                            });
-                        }
-                    </script>
-
-                    </body> </html>
+</body>
+</html>

@@ -1,76 +1,234 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Анализ</title>
-    {% include 'top_menu_links.html'%}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="icon" type="image/png" href="static/images/logo.png">
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script src="static/error_script.js"></script>
+<html style="font-size: 18px;" lang="ru">
+    <head>
+        <title>Анализ DICOM-файла</title>
 
-</head>
-<body>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="static/style.css">
+        <link rel="icon" type="image/png" href="static/images/logo.png">
+         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+        <script src="static/error_script.js"></script>
 
-{% include 'top_menu.html' %}
-    <div class="container mt-4">
-        <h1 class="mb-4">Анализ</h1>
 
-        <form id="upload_form" method="POST" enctype="multipart/form-data">
-            <div id="drop_zone" class="mb-3">
-                <label for="file_input">Drag and drop a file here or click to choose</label>
-                <input type="file" name="file" id="file_input" style="display: none;">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="utf-8">
+        <!--основные стили -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='nicepage.css') }}" media="screen">
+        <link rel="stylesheet" href="{{ url_for('static', filename='Главная-страница.css') }}" media="screen">
+        <!--шрифты -->
+        <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+        <link id="u-page-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i">
+        <script type="application/ld+json">{
+            "@context": "http://schema.org",
+            "@type": "Organization",
+            "name": "Site2",
+            "logo": "static/images/585px-MIREA_Gerb_2021.png"
+            }
+        </script>
+        <meta name="theme-color" content="#411ae7">
+
+        <style>
+        .outer-container {
+        display: flex; /* Применяем Flexbox */
+        flex-direction: column;
+        padding: 20px; /* Добавляем немного отступа вокруг контента */
+        margin-right: 50px; /* Добавляем отступ справа */
+        margin-left: 50px;
+        background-color: #2b2933;
+    }
+
+        .content-wrapper {
+            display: flex; /* Располагаем элементы в строку */;
+            justify-content: flex-start; /* Выравнивание элементов по левому краю */
+
+        }
+
+        /* Картинка слева */
+        .image-container {
+
+            flex: 1; /* Растягиваем на всю оставшуюся ширину */
+            text-align: center; /* Выравниваем текст по левому краю */
+            width: 100%; /* Устанавливаем фиксированную ширину для контейнеров */
+        }
+        .info-wrapper {
+        display: flex;
+        flex-direction: column; /* Блоки будут стопкой, а не строкой */
+        align-items: flex-start; /* Выравниваем блоки по левому краю */
+    }
+
+
+        /* Описание и информация о сервисе справа */
+        .info-container {
+            flex: 1; /* Растягиваем на всю оставшуюся ширину */
+            margin-right: 1px; /* Добавляем отступ справа */
+            text-align: left; /* Выравниваем текст по левому краю */
+            width: 100%; /* Устанавливаем фиксированную ширину для контейнеров */
+
+        }
+
+            h2 {
+              text-align: center;
+            }
+            .detect-button {
+              background-color: #411ae7; /* Красный цвет фона */
+              border: none; /* Убираем границы */
+              color: white; /* Белый цвет текста */
+              padding: 15px 32px; /* Отступы вокруг текста */
+              text-align: center; /* Выравнивание текста по центру */
+              text-decoration: none; /* Убираем подчеркивание текста */
+              display: flex; /* Отображаем кнопку как блочный элемент */
+              font-size: 16px; /* Размер текста */
+              border-radius: 10px; /* Скругляем углы кнопки */
+              transition: background-color 0.3s; /* Плавное изменение цвета фона при наведении */
+              cursor: pointer; /* Изменяем курсор при наведении */
+              align-items: center; /* Выравнивает содержимое по центру */
+              justify-content: center;
+              font-size:18px;
+              margin: 0 auto;
+                }
+
+
+
+        /* Стилизация при наведении на кнопку "Detected" */
+        .detect-button:hover {
+            background-color: #0e80fa; /* Более светлый красный цвет фона при наведении */
+        }
+
+        .save-button {
+            background-color: #28a745;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            font-size: 16px;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size:18px;
+            margin: 10px auto; /* Add some margin above the button */
+            }
+            .save-button:hover {
+            background-color: #218838;
+            }
+            h3 {
+            font-size: 1.5em; /* Увеличиваем размер шрифта */
+            margin-bottom: 10px; /* Добавляем отступ снизу для отделения от остального текста */
+
+            }
+            .divider {
+                width: 100%; /* Занимает всю ширину контейнера */
+                height: 1px; /* Высота линии */
+                background-color: #411ae7; /* Цвет линии */
+                margin-bottom: 20px; /* Расстояние между линией и текстом ниже */
+                margin-top: 20px;
+                }
+
+
+                body{
+                    background-color: #2b2933!important;
+                }
+
+        </style>
+
+
+        {% include 'top_menu_links.html'%}
+    </head>
+    {% include 'top_menu.html' %}
+
+
+    <body class="u-body u-overlap u-overlap-contrast u-overlap-transparent u-xl-mode" data-lang="ru" >
+        <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
+          <div class="outer-container">
+              <div class="mt-4">
+                <h2 class="mb-4">Анализ DICOM-файла</h2>
+                <form id="upload_form" method="POST" enctype="multipart/form-data">
+                    <div id="drop_zone" class="mb-3">
+                        <label for="file_input">Перетащите сюда файл или кликните для выбора</label>
+                        <input type="file" name="file" id="file_input" style="display: none;">
+                    </div>
+                    <button type="submit" class="detect-button" name="action" value="detect">Анализировать</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary btn-lg" name="action" value="detect">Detect</button>
-        </form>
-            {% if error %}
-                <script>
-                    showError('{{error}}');
-                </script>
-            {% else %}
-                <h2>Модальность: {{ modality }}</h2>
-                <h2>Часть тела: {{ body_part }}</h2>
-                <h2>Исследование обезличенно: {{ patient_identity_removed }}</h2>
-
-                <img src="{{ path }}" class="img-fluid mt-3">
-<!--                <input type="hidden" id="action_input" name="action">-->
-             <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
-                   <input type="hidden" name="image_path" value="{{ image_path }}">
-             </form>
-            {% endif %}
-        </div>
+          </section>
 
 
-    <script>
-        const dropZone = document.getElementById('drop_zone');
-        const fileInput = document.getElementById('file_input');
-
-        dropZone.addEventListener('dragover', (event) => {
-            event.preventDefault();
-            dropZone.style.backgroundColor = '#f0f0f0';
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.backgroundColor = '';
-        });
-
-        dropZone.addEventListener('drop', (event) => {
-            event.preventDefault();
-            dropZone.style.backgroundColor = '';
-            const file = event.dataTransfer.files[0];
-            fileInput.files = event.dataTransfer.files;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const uploadedImage = document.createElement('img');
-                uploadedImage.src = e.target.result;
-                uploadedImage.classList.add('img-fluid', 'mt-3');
-                dropZone.appendChild(uploadedImage);
-            };
-            reader.readAsDataURL(file);
-        });
-    </script>
+          {% if error %}
+          <script>
+              showError('{{error}}');
+          </script>
 
 
-</body>
+
+              {% else %}
+              <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
+                  <div class="outer-container">
+                      <div class="content-wrapper">
+
+                  <div class="image-container">
+                      <img src="{{ path }}" class="img-fluid mt-3">
+                  </div>
+
+                  <div class="info-wrapper">
+                      <div class="info-container">
+                          <h3>Результат обработки изображения</h3>
+                          <div class="divider"></div>
+                          <h5>Модальность: {{ modality }}</h5>
+                          <h5>Часть тела: {{ body_part }} </h5>
+                          <h5>Исследование обезличенно: {{ patient_identity_removed }}</h5>
+
+
+                          <form id="action_form_buttons" method="POST" enctype="multipart/form-data">
+                              <input type="hidden" name="image_path" value="{{ image_path }}">
+                        </form>
+                  </div>
+              </div>
+                  </div>
+                  {% endif %}
+              </div>
+
+
+              </section>
+
+
+              <script>
+                const dropZone = document.getElementById('drop_zone');
+                const fileInput = document.getElementById('file_input');
+
+                function handleFileSelect(files) {
+                  const file = files[0];
+                  fileInput.files = files;
+
+                  // Создаем элемент для отображения названия файла
+                  const fileNameElement = document.createElement('p');
+                  fileNameElement.textContent = file.name;
+                  dropZone.appendChild(fileNameElement);
+                }
+
+                dropZone.addEventListener('dragover', (event) => {
+                  event.preventDefault();
+                  dropZone.style.backgroundColor = '#f0f0f0';
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                  dropZone.style.backgroundColor = '';
+                });
+
+                dropZone.addEventListener('drop', (event) => {
+                  event.preventDefault();
+                  dropZone.style.backgroundColor = '';
+                  const files = event.dataTransfer.files;
+                  handleFileSelect(files);
+                });
+
+                fileInput.addEventListener('change', (event) => {
+                  const files = event.target.files;
+                  handleFileSelect(files);
+                });
+
+            </script>
+    </body>
 </html>

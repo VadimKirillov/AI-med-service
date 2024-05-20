@@ -64,6 +64,18 @@
             width: 100%; /* Устанавливаем фиксированную ширину для контейнеров */
 
         }
+        .warning-box {
+        background-color: #23212c;
+        color: red;
+        padding: 15px;
+        margin-top: 20px; /* Отступ сверху */
+        text-align: center;
+        border-radius: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        max-width: 600px; /* Максимальная ширина блока */
+        word-wrap: break-word; /* Перенос слов на следующую строку */
+    }
 
             h2 {
               text-align: center;
@@ -83,7 +95,7 @@
               align-items: center; /* Выравнивает содержимое по центру */
               justify-content: center;
               font-size:18px;
-              margin: 0 auto;
+              margin: 10px;
                 }
 
 
@@ -108,7 +120,7 @@
             align-items: center;
             justify-content: center;
             font-size:18px;
-            margin: 10px auto; /* Add some margin above the button */
+            margin: 10px; /* Add some margin above the button */
             }
             .save-button:hover {
             background-color: #218838;
@@ -118,6 +130,10 @@
             margin-bottom: 10px; /* Добавляем отступ снизу для отделения от остального текста */
 
             }
+            body{
+                    background-color: #2b2933!important;
+                }
+
             .divider {
                 width: 100%; /* Занимает всю ширину контейнера */
                 height: 1px; /* Высота линии */
@@ -125,7 +141,11 @@
                 margin-bottom: 20px; /* Расстояние между линией и текстом ниже */
                 margin-top: 20px;
                 }
-
+                #action_form_buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* Расстояние между кнопками */
+    }
 
         </style>
 
@@ -166,8 +186,10 @@
                                     <button type="submit" class="btn btn-danger mr-2" id="delete_button" name="action" value="delete">Удалить</button>
                                     <button type="submit" class="btn btn-success mr-2" id="back_button" name="action" value="back">Назад</button>
 
-
                             </form>
+                            <div class="warning-box">
+                                <p>Внимание! Результат получен при поддержке алгоритма искусственного интеллекта.<br>Только для исследовательских целей</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,7 +199,8 @@
 <script>
   document.getElementById('pdf_button').addEventListener('click', function() {
     // Получение данных из HTML
-    const serviceName = "{{ journal.service.name }}";
+
+    const serviceName = "{{ '%08d' | format(journal.id) }}";
     const imageUrl = "/{{ journal.input_image_url }}";
     const result = "{{ journal.service_result }}";
     const probability = "{{ journal.percent_patology }}%";
@@ -200,9 +223,9 @@
     img.onload = function() {
       // Изображение загружено, добавляем его в PDF
       doc.addImage(img, 'JPEG', 20, 70, 160, 90);
-
+        //result = "{{ '%08d' | format(journal.id) }}"
       // Сохранение PDF
-      doc.save('result.pdf');
+      doc.save('"{{ '%08d' | format(journal.id) }}".pdf');
     };
 
     img.onerror = function() {

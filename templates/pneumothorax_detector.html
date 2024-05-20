@@ -91,7 +91,18 @@
         .detect-button:hover {
             background-color: #0e80fa; /* Более светлый красный цвет фона при наведении */
         }
-
+        .warning-box {
+        background-color: #23212c;
+        color: red;
+        padding: 15px;
+        margin-top: 20px; /* Отступ сверху */
+        text-align: center;
+        border-radius: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        max-width: 600px; /* Максимальная ширина блока */
+        word-wrap: break-word; /* Перенос слов на следующую строку */
+    }
         .save-button {
             background-color: #28a745;
             border: none;
@@ -141,7 +152,7 @@
       <section class="u-clearfix u-palette-1-dark-3 u-section-1" id="sec-1e8b" data-animation-name="" data-animation-duration="0" data-animation-delay="0" data-animation-direction="">
         <div class="outer-container">
             <div class="mt-4">
-              <h2 class="mb-4">Определение пневматорокса</h2>
+              <h2 class="mb-4">Определение пневмоторакса</h2>
               <form id="upload_form" method="POST" enctype="multipart/form-data">
                   <div id="drop_zone" class="mb-3">
                       <label for="file_input">Перетащите сюда файл или кликните для выбора</label>
@@ -183,6 +194,9 @@
                         <input type="hidden" name="image_path" value="{{ image_path }}">
                          <button type="submit" class="save-button" id="save_button" name="action" value="save">Сохранить</button>
                   </form>
+                         <div class="warning-box">
+                    <p>Внимание! Результат получен при поддержке алгоритма искусственного интеллекта.<br>Только для исследовательских целей</p>
+                </div>
                 </div>
             </div>
                 </div>

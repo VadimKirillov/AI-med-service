@@ -65,7 +65,7 @@ with app.app_context():
 
     if not Target.query.all():
         # Добавление тестовых данных в таблицу Target
-        target_data = ["Грудная полость", "Мозг", "Позвоночник", "Брюшная полость", "Мульти", "Другое"]
+        target_data = ["Грудная полость", "Мозг", "Позвоночник", "Брюшная полость", "Кожа", "Мульти", "Другое"]
         for target_name in target_data:
             target = Target(name=target_name)
             db.session.add(target)
@@ -85,35 +85,35 @@ with app.app_context():
         db.session.add(user)
 
     if not Service.query.all():
-        covid_detector = Service(name='COVID-Classifier', url='covid_detector',
+        covid_detector = Service(name='Определение COVID', url='covid_detector',
                                  description='COVID-19 бинарное определение',
                                  image_url='/static/images/covid_detector_logo.png',
                                  pathology_id=1, target_id=1, modal_id=3)
 
-        covid_segmentator = Service(name='COVID-Segmentator', url='covid_segmentator',
+        covid_segmentator = Service(name='Сегментация COVID', url='covid_segmentator',
                                     image_url='/static/images/covid_segmentator_logo.png',
                                     description='COVID-19 сегментация лёгких и поражённых областей',
                                     pathology_id=1, target_id=1, modal_id=3)
 
-        brain_tumor_classifier = Service(name='Brain_Tumor-Detector', url='brain_tumor_detector',
+        brain_tumor_classifier = Service(name='Определение опухоли в мозге', url='brain_tumor_detector',
                                          image_url='/static/images/brain_tumor_logo.png',
                                          description='Определение опухоли в мозге',
                                          pathology_id=3, target_id=2, modal_id=1)
 
-        pneumonia_classifier = Service(name='Pneumonia-Detector', url='pneumonia_detector',
+        pneumonia_classifier = Service(name='Определение пневмонии', url='pneumonia_detector',
                                        image_url='/static/images/pneumonia_logo.jpg',
                                        description='Определение пневмонии в лёгких',
                                        pathology_id=2, target_id=1, modal_id=3)
 
-        pneumothorax_classifier = Service(name='Pneumothorax-Detector', url='pneumothorax_detector',
+        pneumothorax_classifier = Service(name='Определение пневмоторакса', url='pneumothorax_detector',
                                           image_url='/static/images/pneumothorax_logo.png',
                                           description='Определение пневмоторакса в лёгких',
                                           pathology_id=5, target_id=1, modal_id=3)
 
-        melanoma_classifier = Service(name='Melanoma-Detector', url='melanoma_detector',
+        melanoma_classifier = Service(name='Определение типа новообразований на коже', url='melanoma_detector',
                                       image_url='/static/images/melanoma_logo.png',
-                                      description='Определение типа меланомы на коже',
-                                      pathology_id=4, target_id=5, modal_id=5)
+                                      description='Определение типа новообразований на коже',
+                                      pathology_id=5, target_id=5, modal_id=5)
 
         db.session.add(covid_detector)
         db.session.add(covid_segmentator)
@@ -512,7 +512,7 @@ def covid_segmentator():
                 image = Image.alpha_composite(image, lung_overlay)
                 image = Image.alpha_composite(image, infection_overlay)
 
-                uid = str(uuid.uuid4()) + "segmentation.png"
+                uid = str(uuid.uuid4()) #+ "segmentation.png"
                 output_path = os.path.join("static/images", f'{uid}.png')
 
                 image.save(output_path)
@@ -554,7 +554,6 @@ def covid_segmentator():
 
             image_path = image_path.replace('\\', '/')
             input_path = input_path.replace('\\', '/')
-
             # Создать новую запись в таблице Journal
             new_journal_entry = Journal(
                 service_id=service.id,
@@ -986,6 +985,9 @@ def dicom_analysis():
 
     return render_template('dicom_analysis.html')
 
+@app.route('/nomogramm', methods=['GET', 'POST'])
+def nomogramm():
+    return render_template("nomogramm.html")
 
 def dcm_to_jpg(ds):
     # Convert DICOM to PIL Image
