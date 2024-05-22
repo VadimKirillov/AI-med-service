@@ -8,6 +8,7 @@ from nn_models.lung_autoencoder import ConvAutoencoder
 from nn_models.lung_outliers_classifier import check_lungs
 from nn_models.scratch import CovidClassifier
 from nn_models.classifier import classify_image, bin_classify_image
+from nn_models.melanoma_classifier import classify_image_melanoma
 from nn_models.lung_segmentator import predict_mask, remove_small_regions
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
@@ -833,19 +834,17 @@ def melanoma_detector():
 
                 image_size = (64, 64)
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                lung_outliners_model = ConvAutoencoder().to(device)
-                lung_outliners_model.load_state_dict(
-                    torch.load('static/model_outlier_weights.pth', map_location=torch.device(device)))
-                status_outliers = check_lungs(image_path, lung_outliners_model, image_size, device)
-                print("status_outliers", status_outliers)
-                if status_outliers == 0:
-                    return render_template("melanoma_detector.html", error="Body_part_error")
 
-                model = CovidClassifier()
-                model.load_state_dict(torch.load('static/covid_classifier_weights.pth'))
+                model = models.resnet18(weights='DEFAULT')
+                num_ftrs = model.fc.in_features
+                model.fc = torch.nn.Linear(num_ftrs, 9)
+
+                model.load_state_dict(torch.load('static/melanoma_resnet_weights.pth'))
+                model = model.to(device)
+
                 start_time = datetime.now().isoformat()
-                predicted_label = classify_image(file_path, model)[0]
-                predicted_prob = classify_image(file_path, model)[1]
+                predicted_label = classify_image_melanoma(file_path, model, device)
+                predicted_prob = 100
 
                 print(predicted_label)
 
