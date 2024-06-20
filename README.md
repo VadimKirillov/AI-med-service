@@ -5,8 +5,8 @@
 
 ## Collab ноутбуки
 
-Сегментация легких (U-NET) - https://colab.research.google.com/drive/1oY1LPSUIrmkXnZvKMRqlIrgp6LpPFBE7 <br>
-Сегментация инфекции на снимке легких на датасете CovidQuEx (U-NET++) - https://colab.research.google.com/drive/1D7X61mwgJV1Jzt5iPFSJjLumvwob7Tzz <br>
+Сегментация легких (U-NET) - https://colab.research.google.com/drive/1oY1LPSUIrmkXnZvKMRqlIrgp6LpPFBE7?usp=sharing <br>
+Сегментация инфекции на снимке легких на датасете CovidQuEx (U-NET++) - https://colab.research.google.com/drive/1D7X61mwgJV1Jzt5iPFSJjLumvwob7Tzz?usp=sharing <br>
 
 ## Реализованные с помощью ИИ функции
 
